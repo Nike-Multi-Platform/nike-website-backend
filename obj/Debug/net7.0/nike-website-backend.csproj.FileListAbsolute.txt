@@ -1,0 +1,66 @@
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\appsettings.Development.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\appsettings.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\nike-website-backend.exe
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\nike-website-backend.deps.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\nike-website-backend.runtimeconfig.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\nike-website-backend.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\nike-website-backend.pdb
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\Microsoft.OpenApi.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.csproj.AssemblyReference.cache
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.AssemblyInfoInputs.cache
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.AssemblyInfo.cs
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.csproj.CoreCompileInputs.cache
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets.build.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets.development.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.nike-website-backend.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.build.nike-website-backend.props
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.nike-website-backend.props
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.buildTransitive.nike-website-backend.props
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\staticwebassets.pack.json
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\scopedcss\bundle\nike-website-backend.styles.css
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-web.477BC878.Up2Date
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\refint\nike-website-backend.dll
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.pdb
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\nike-website-backend.genruntimeconfig.cache
+C:\Users\ADMIN\Documents\C#\cnpm_nc\nike-website-backend\obj\Debug\net7.0\ref\nike-website-backend.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\appsettings.Development.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\appsettings.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\nike-website-backend.exe
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\nike-website-backend.deps.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\nike-website-backend.runtimeconfig.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\nike-website-backend.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\nike-website-backend.pdb
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\Microsoft.OpenApi.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.csproj.AssemblyReference.cache
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.AssemblyInfoInputs.cache
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.AssemblyInfo.cs
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.csproj.CoreCompileInputs.cache
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets.build.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets.development.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.nike-website-backend.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.build.nike-website-backend.props
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.nike-website-backend.props
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets\msbuild.buildTransitive.nike-website-backend.props
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\staticwebassets.pack.json
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\scopedcss\bundle\nike-website-backend.styles.css
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-web.477BC878.Up2Date
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\refint\nike-website-backend.dll
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.pdb
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.genruntimeconfig.cache
+C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\ref\nike-website-backend.dll
