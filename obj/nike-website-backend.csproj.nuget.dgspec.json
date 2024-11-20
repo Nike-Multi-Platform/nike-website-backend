@@ -1,36 +1,37 @@
 {
   "format": 1,
   "restore": {
-    "D:\\UngDungThongMinh\\nike-backend\\nike-website-backend\\nike-website-backend.csproj": {}
+    "C:\\Users\\ADMIN\\Máy tính\\nike-website-backend\\nike-website-backend.csproj": {}
   },
   "projects": {
-    "D:\\UngDungThongMinh\\nike-backend\\nike-website-backend\\nike-website-backend.csproj": {
+    "C:\\Users\\ADMIN\\Máy tính\\nike-website-backend\\nike-website-backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\UngDungThongMinh\\nike-backend\\nike-website-backend\\nike-website-backend.csproj",
+        "projectUniqueName": "C:\\Users\\ADMIN\\Máy tính\\nike-website-backend\\nike-website-backend.csproj",
         "projectName": "nike-website-backend",
-        "projectPath": "D:\\UngDungThongMinh\\nike-backend\\nike-website-backend\\nike-website-backend.csproj",
-        "packagesPath": "C:\\Users\\boqua\\.nuget\\packages\\",
-        "outputPath": "D:\\UngDungThongMinh\\nike-backend\\nike-website-backend\\obj\\",
+        "projectPath": "C:\\Users\\ADMIN\\Máy tính\\nike-website-backend\\nike-website-backend.csproj",
+        "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ADMIN\\Máy tính\\nike-website-backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\boqua\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net7.0"
+          "net8.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net7.0": {
-            "targetAlias": "net7.0",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -38,15 +39,30 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
-        "net7.0": {
-          "targetAlias": "net7.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -72,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
