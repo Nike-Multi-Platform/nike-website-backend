@@ -23,6 +23,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<FlashSale> FlashSales { get; set; }
 
+    public virtual DbSet<FlashSaleTimeFrame> FlashSaleTimeFrames { get; set; }
+
     public virtual DbSet<GoodsReceipt> GoodsReceipts { get; set; }
 
     public virtual DbSet<GoodsReceiptDetail> GoodsReceiptDetails { get; set; }
@@ -43,13 +45,15 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<ProductSize> ProductSizes { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<RegisterFlashSaleProduct> RegisterFlashSaleProducts { get; set; }
 
     public virtual DbSet<Size> Sizes { get; set; }
 
     public virtual DbSet<SubCategory> SubCategories { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
+
+    public virtual DbSet<TempImportsProduct> TempImportsProducts { get; set; }
 
     public virtual DbSet<UserAccount> UserAccounts { get; set; }
 
@@ -68,11 +72,11 @@ public partial class ApplicationDbContext : DbContext
     {
         modelBuilder.Entity<Bag>(entity =>
         {
-            entity.HasKey(e => e.BagId).HasName("PK__bag__35AAA7693D1CDA3C");
+            entity.HasKey(e => e.BagId).HasName("PK__bag__35AAA7692B556F7A");
 
             entity.ToTable("bag");
 
-            entity.HasIndex(e => new { e.UserId, e.ProductSizeId }, "UQ__bag__29DC9EA84924102B").IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.ProductSizeId }, "UQ__bag__29DC9EA80DB6F3F6").IsUnique();
 
             entity.Property(e => e.BagId).HasColumnName("bag_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
@@ -81,11 +85,11 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.ProductSize).WithMany(p => p.Bags)
                 .HasForeignKey(d => d.ProductSizeId)
-                .HasConstraintName("FK__bag__product_siz__628FA481");
+                .HasConstraintName("FK__bag__product_siz__5535A963");
 
             entity.HasOne(d => d.User).WithMany(p => p.Bags)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__bag__user_id__6383C8BA");
+                .HasConstraintName("FK__bag__user_id__5629CD9C");
         });
 
         modelBuilder.Entity<Category>(entity =>
@@ -108,7 +112,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<DiscountVoucher>(entity =>
         {
-            entity.HasKey(e => e.DiscountVoucherId).HasName("PK__discount__63A429D13D44B5BA");
+            entity.HasKey(e => e.DiscountVoucherId).HasName("PK__discount__63A429D11E8AD63D");
 
             entity.ToTable("discount_voucher");
 
@@ -121,7 +125,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<FlashSale>(entity =>
         {
-            entity.HasKey(e => e.FlashSaleId).HasName("PK__flash_sa__55B42396A2BA18EC");
+            entity.HasKey(e => e.FlashSaleId).HasName("PK__flash_sa__55B4239673EE1B5D");
 
             entity.ToTable("flash_sale");
 
@@ -144,9 +148,39 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("FK_flash_sale_product");
         });
 
+        modelBuilder.Entity<FlashSaleTimeFrame>(entity =>
+        {
+            entity.ToTable("flash_sale_time_frame");
+
+            entity.Property(e => e.FlashSaleTimeFrameId)
+                .ValueGeneratedNever()
+                .HasColumnName("flash_sale_time_frame_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.EndedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("ended_at");
+            entity.Property(e => e.FlashSaleId).HasColumnName("flash_sale_id");
+            entity.Property(e => e.StartedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("started_at");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasColumnName("status");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.FlashSale).WithMany(p => p.FlashSaleTimeFrames)
+                .HasForeignKey(d => d.FlashSaleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_flash_sale_time_frame_flash_sale");
+        });
+
         modelBuilder.Entity<GoodsReceipt>(entity =>
         {
-            entity.HasKey(e => e.GoodsReceiptId).HasName("PK__goods_re__B3795317E4F85609");
+            entity.HasKey(e => e.GoodsReceiptId).HasName("PK__goods_re__B37953179AC3A581");
 
             entity.ToTable("goods_receipt");
 
@@ -206,7 +240,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<HistorySearch>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__history___3213E83F5EF404E5");
+            entity.HasKey(e => e.Id).HasName("PK__history___3213E83FAA396B43");
 
             entity.ToTable("history_search");
 
@@ -218,7 +252,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.HistorySearches)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__history_s__user___6B24EA82");
+                .HasConstraintName("FK__history_s__user___5EBF139D");
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -255,21 +289,16 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("money")
                 .HasColumnName("sale_prices");
             entity.Property(e => e.Sold).HasColumnName("sold");
-            entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.TotalStock).HasColumnName("total_stock");
 
             entity.HasOne(d => d.ProductParent).WithMany(p => p.Products)
                 .HasForeignKey(d => d.ProductParentId)
                 .HasConstraintName("fk_p_pp");
-
-            entity.HasOne(d => d.Supplier).WithMany(p => p.Products)
-                .HasForeignKey(d => d.SupplierId)
-                .HasConstraintName("FK_product_supplier");
         });
 
         modelBuilder.Entity<ProductIcon>(entity =>
         {
-            entity.HasKey(e => e.ProductIconsId).HasName("PK__product___0630B7414516EE84");
+            entity.HasKey(e => e.ProductIconsId).HasName("PK__product___0630B7417706AAC7");
 
             entity.ToTable("product_icons");
 
@@ -285,7 +314,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProductImg>(entity =>
         {
-            entity.HasKey(e => e.ProductImgId).HasName("PK__product___C6E033978EF7A8FE");
+            entity.HasKey(e => e.ProductImgId).HasName("PK__product___C6E0339705121B4E");
 
             entity.ToTable("product_img");
 
@@ -302,7 +331,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProductObject>(entity =>
         {
-            entity.HasKey(e => e.ProductObjectId).HasName("PK__product___B8691505FCA9504D");
+            entity.HasKey(e => e.ProductObjectId).HasName("PK__product___B86915052BF3C6BB");
 
             entity.ToTable("product_object");
 
@@ -343,7 +372,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProductReview>(entity =>
         {
-            entity.HasKey(e => e.ProductReviewId).HasName("PK__product___8440EB03653B3977");
+            entity.HasKey(e => e.ProductReviewId).HasName("PK__product___8440EB03957B3702");
 
             entity.ToTable("product_review");
 
@@ -390,23 +419,42 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("fk_ps_s");
         });
 
-        modelBuilder.Entity<Role>(entity =>
+        modelBuilder.Entity<RegisterFlashSaleProduct>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__role__760965CC49A1EA35");
+            entity.HasKey(e => e.RegisterFlashSaleProduct1);
 
-            entity.ToTable("role");
+            entity.ToTable("register_flash_sale_product");
 
-            entity.Property(e => e.RoleId)
+            entity.Property(e => e.RegisterFlashSaleProduct1)
                 .ValueGeneratedNever()
-                .HasColumnName("role_id");
-            entity.Property(e => e.RoleName)
-                .HasMaxLength(50)
-                .HasColumnName("role_name");
+                .HasColumnName("register_flash_sale_product");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.FlashSalePrice).HasColumnName("flash_sale_price");
+            entity.Property(e => e.FlashSaleTimeFrameId).HasColumnName("flash_sale_time_frame_id");
+            entity.Property(e => e.OriginalPrice).HasColumnName("original_price");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.Sold).HasColumnName("sold");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.FlashSaleTimeFrame).WithMany(p => p.RegisterFlashSaleProducts)
+                .HasForeignKey(d => d.FlashSaleTimeFrameId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_register_flash_sale_product_flash_sale_time_frame");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.RegisterFlashSaleProducts)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_register_flash_sale_product_product");
         });
 
         modelBuilder.Entity<Size>(entity =>
         {
-            entity.HasKey(e => e.SizeId).HasName("PK__size__0DCACE3137949468");
+            entity.HasKey(e => e.SizeId).HasName("PK__size__0DCACE31A8625CF4");
 
             entity.ToTable("size");
 
@@ -418,7 +466,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<SubCategory>(entity =>
         {
-            entity.HasKey(e => e.SubCategoriesId).HasName("PK__sub_cate__F899CDB55C7C9BE9");
+            entity.HasKey(e => e.SubCategoriesId).HasName("PK__sub_cate__F899CDB5CEEA8D3C");
 
             entity.ToTable("sub_categories");
 
@@ -435,7 +483,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.HasKey(e => e.SupplierId).HasName("PK__supplier__6EE594E8871B2C9F");
+            entity.HasKey(e => e.SupplierId).HasName("PK__supplier__6EE594E8B70ED375");
 
             entity.ToTable("supplier");
 
@@ -445,14 +493,33 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("supplier_name");
         });
 
+        modelBuilder.Entity<TempImportsProduct>(entity =>
+        {
+            entity.HasKey(e => e.TempId).HasName("PK__temp_imp__FEEC6BDB90847939");
+
+            entity.ToTable("temp_imports_product");
+
+            entity.Property(e => e.TempId).HasColumnName("temp_id");
+            entity.Property(e => e.ImportPrice)
+                .HasColumnType("money")
+                .HasColumnName("import_price");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductSizeId).HasColumnName("product_size_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
+            entity.Property(e => e.TotalPrice)
+                .HasComputedColumnSql("([import_price]*[quantity])", false)
+                .HasColumnType("money")
+                .HasColumnName("total_price");
+        });
+
         modelBuilder.Entity<UserAccount>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__user_acc__B9BE370F1B733B7D");
+            entity.HasKey(e => e.UserId).HasName("PK__user_acc__B9BE370F73916F53");
 
             entity.ToTable("user_account");
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.UserAddress).HasColumnName("user_address");
             entity.Property(e => e.UserEmail)
                 .HasMaxLength(255)
@@ -484,10 +551,6 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("user_username");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.UserAccounts)
-                .HasForeignKey(d => d.RoleId)
-                .HasConstraintName("FK_ROLE");
         });
 
         modelBuilder.Entity<UserDiscountVoucher>(entity =>
@@ -554,6 +617,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(60)
                 .HasColumnName("first_name");
             entity.Property(e => e.IsProcessed).HasColumnName("is_processed");
+            entity.Property(e => e.IsReviewed).HasColumnName("is_reviewed");
             entity.Property(e => e.LastName)
                 .HasMaxLength(60)
                 .HasColumnName("last_name");

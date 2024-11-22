@@ -22,7 +22,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IProductRepository, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryService>();
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+        //policyBuilder.AllowAnyMethod();
+        //policyBuilder.AllowAnyHeader();
+        //policyBuilder.AllowCredentials();
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,9 +42,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("ReactApp");
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+

@@ -1,0 +1,34 @@
+# .NET
+.vs/
+.vscode/
+.idea/
+bin/
+obj/
+packages/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# NPM/Yarn
+node_modules/
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# NuGet
+.nuget/
+
+# VS Code specific
+.vscode/
+
+# Local settings
+appsettings.Development.json
+appsettings.Local.json
+
+# Rider
+.idea/

@@ -29,5 +29,7 @@ public partial class UserOrder
 
     public DateTime? UpdatedAt { get; set; }
 
+    public int? IsReviewed { get; set; }
+
     public virtual ICollection<UserOrderProduct> UserOrderProducts { get; set; } = new List<UserOrderProduct>();
 }
