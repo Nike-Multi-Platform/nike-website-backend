@@ -25,6 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IProductRepository, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryService>();
+builder.Services.AddScoped<IUserAccountRepository, UserAccountService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp", policyBuilder =>
@@ -38,10 +39,19 @@ builder.Services.AddCors(options =>
 
 
 // firebase create 
-FirebaseApp.Create(new AppOptions()
+try
 {
-    Credential = GoogleCredential.FromFile("Configs/nike-d3392-firebase-adminsdk-t6ndk-364532f7b5.json")
-});
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile("Configs/nike-d3392-firebase-adminsdk-t6ndk-364532f7b5.json")
+    });
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error initializing Firebase: {ex.Message}");
+    throw;
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
