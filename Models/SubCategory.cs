@@ -12,6 +12,4 @@ public partial class SubCategory
     public int? CategoriesId { get; set; }
 
     public virtual Category? Categories { get; set; }
-
-    public virtual ICollection<ProductParent> ProductParents { get; set; } = new List<ProductParent>();
 }
