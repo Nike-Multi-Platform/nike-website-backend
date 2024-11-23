@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using nike_website_backend.Interfaces;
 using nike_website_backend.Models;
 using nike_website_backend.Services;
+using FirebaseAdmin;
+using Google;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +34,13 @@ builder.Services.AddCors(options =>
         //policyBuilder.AllowAnyHeader();
         //policyBuilder.AllowCredentials();
     });
+});
+
+
+// firebase create 
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("Configs/nike-d3392-firebase-adminsdk-t6ndk-364532f7b5.json")
 });
 var app = builder.Build();
 
