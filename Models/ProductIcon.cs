@@ -10,4 +10,6 @@ public partial class ProductIcon
     public string? IconName { get; set; }
 
     public string? Thumbnail { get; set; }
+
+    public virtual ICollection<ProductParent> ProductParents { get; set; } = new List<ProductParent>();
 }
