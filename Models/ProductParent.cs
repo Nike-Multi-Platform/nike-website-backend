@@ -19,9 +19,13 @@ public partial class ProductParent
 
     public int? SubCategoriesId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    public virtual ProductIcon? ProductIcons { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+
+    public virtual SubCategory? SubCategories { get; set; }
 }

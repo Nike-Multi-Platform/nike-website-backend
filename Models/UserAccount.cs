@@ -29,7 +29,7 @@ public partial class UserAccount
 
     public string? UserUrl { get; set; }
 
-    public int? RoleId { get; set; }
+    public int RoleId { get; set; }
 
     public virtual ICollection<Bag> Bags { get; set; } = new List<Bag>();
 
@@ -39,7 +39,7 @@ public partial class UserAccount
 
     public virtual ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
 
-    public virtual Role? Role { get; set; }
+    public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<UserDiscountVoucher> UserDiscountVouchers { get; set; } = new List<UserDiscountVoucher>();
 
