@@ -64,3 +64,6 @@ C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\refint\nike-webs
 C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.pdb
 C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\nike-website-backend.genruntimeconfig.cache
 C:\Users\ADMIN\Máy tính\nike-website-backend\obj\Debug\net7.0\ref\nike-website-backend.dll
+D:\Nike-Multiplatform\Nike-website\nike-website-backend\obj\Debug\net7.0\nike-website-backend.dll
+D:\Nike-Multiplatform\Nike-website\nike-website-backend\obj\Debug\net7.0\refint\nike-website-backend.dll
+D:\Nike-Multiplatform\Nike-website\nike-website-backend\obj\Debug\net7.0\nike-website-backend.pdb

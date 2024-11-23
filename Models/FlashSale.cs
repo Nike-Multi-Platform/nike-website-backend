@@ -15,5 +15,7 @@ public partial class FlashSale
 
     public DateTime? EndedAt { get; set; }
 
+    public virtual ICollection<FlashSaleTimeFrame> FlashSaleTimeFrames { get; set; } = new List<FlashSaleTimeFrame>();
+
     public virtual Product? Product { get; set; }
 }

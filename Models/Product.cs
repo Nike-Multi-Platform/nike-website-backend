@@ -23,8 +23,6 @@ public partial class Product
 
     public string? ProductDescription2 { get; set; }
 
-    public int? SupplierId { get; set; }
-
     public decimal? SalePrices { get; set; }
 
     public int? Sold { get; set; }
@@ -43,7 +41,7 @@ public partial class Product
 
     public virtual ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
 
-    public virtual Supplier? Supplier { get; set; }
+    public virtual ICollection<RegisterFlashSaleProduct> RegisterFlashSaleProducts { get; set; } = new List<RegisterFlashSaleProduct>();
 
     public virtual ICollection<UserFavoriteProduct> UserFavoriteProducts { get; set; } = new List<UserFavoriteProduct>();
 }

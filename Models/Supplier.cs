@@ -10,6 +10,4 @@ public partial class Supplier
     public string? SupplierName { get; set; }
 
     public virtual ICollection<GoodsReceipt> GoodsReceipts { get; set; } = new List<GoodsReceipt>();
-
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }
