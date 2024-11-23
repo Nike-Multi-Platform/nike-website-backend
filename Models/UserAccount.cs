@@ -29,6 +29,8 @@ public partial class UserAccount
 
     public string? UserUrl { get; set; }
 
+    public int? RoleId { get; set; }
+
     public virtual ICollection<Bag> Bags { get; set; } = new List<Bag>();
 
     public virtual ICollection<GoodsReceipt> GoodsReceipts { get; set; } = new List<GoodsReceipt>();
@@ -36,6 +38,8 @@ public partial class UserAccount
     public virtual ICollection<HistorySearch> HistorySearches { get; set; } = new List<HistorySearch>();
 
     public virtual ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
+
+    public virtual Role? Role { get; set; }
 
     public virtual ICollection<UserDiscountVoucher> UserDiscountVouchers { get; set; } = new List<UserDiscountVoucher>();
 
