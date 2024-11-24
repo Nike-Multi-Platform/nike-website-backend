@@ -26,9 +26,9 @@ namespace nike_website_backend.Services
             _context = context;
         }
 
-        public async Task<Response<FirebaseToken>> VerifyIdTokenAsync(string idToken)
+        public async Task<Response<Object>> VerifyIdTokenAsync(string idToken)
         {
-            var response = new Response<FirebaseToken>();
+            var response = new Response<Object>();
 
             if (string.IsNullOrEmpty(idToken))
             {
@@ -48,8 +48,12 @@ namespace nike_website_backend.Services
                     response.StatusCode = 404;
                     return response;
                 }
-                response.Data = decodedToken;
-                response.User = user;
+                Object data = new
+                {
+                    decodedToken,
+                    user
+                };
+                response.Data = data;
                 response.Message = "Token verified successfully.";
                 response.StatusCode = 200; 
                 return response;
@@ -203,9 +207,9 @@ namespace nike_website_backend.Services
             return response;
         }
 
-        public async Task<Response<string>> RegisterAsync(RegisterDto userinfo)
+        public async Task<Response<object>> RegisterAsync(RegisterDto userinfo)
         {
-            var response = new Response<string>();
+            var response = new Response<object>();
 
             // Validate required fields
             if (string.IsNullOrWhiteSpace(userinfo.UserEmail) ||
@@ -288,11 +292,12 @@ namespace nike_website_backend.Services
                 // Prepare response
                 response.Message = "User created successfully. Please check your email to verify your account.";
                 response.StatusCode = 200;
-                response.DataResponse = new
+                object data = new
                 {
                     User = newUser,
                     UserRecord = userRecord
                 };
+                response.Data = data;
                 return response;
             }
             catch (Exception ex)
