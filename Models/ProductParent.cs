@@ -27,5 +27,7 @@ public partial class ProductParent
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 
+    public virtual ICollection<RegisterFlashSaleProduct> RegisterFlashSaleProducts { get; set; } = new List<RegisterFlashSaleProduct>();
+
     public virtual SubCategory? SubCategories { get; set; }
 }

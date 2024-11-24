@@ -128,7 +128,8 @@ namespace nike_website_backend.Services
                 Products = p.Products.Select(p => new ProductDto
                 {
                     ProductId = p.ProductId,
-                    ProductImage = p.ProductImg
+                    ProductImage = p.ProductImg,
+                   
                     // ... more properties
                 }).ToList(),
                 Thumbnail = p.Thumbnail,
@@ -158,5 +159,47 @@ namespace nike_website_backend.Services
             response.Data = productParentDtos;
             return response;
         }
+        public async Task<Response<List<ProductIcon>>> GetIcons(int page, int limit)
+        {
+            var offset = (page - 1) * limit;
+            Response<List<ProductIcon>> response = new Response<List<ProductIcon>>();
+            var icons = await _context.ProductIcons.Skip(offset).Take(limit).ToListAsync();
+           response.StatusCode =200;
+            response.Message = "Lấy dữ liệu thành công";
+            response.Data = icons;
+            return response;
+        }
+
+        public async Task<Response<List<ProductParentDto>>> GetNewRelease(int page, int limit)
+        {   
+            var offset = (page - 1) * limit;
+            Response<List<ProductParentDto>> response = new Response<List<ProductParentDto>>();
+            var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+            var currentDate = DateTime.Now;
+
+            var query = _context.ProductParents.Where(p => p.CreatedAt >= thirtyDaysAgo && p.CreatedAt <= currentDate).Select(p => new ProductParentDto
+            {
+                ProductParentId = p.ProductParentId,
+                ProductParentName = p.ProductParentName,
+                ProductIconsId = p.ProductIconsId,
+                Thumbnail = p.Thumbnail,
+                ProductPrice = p.ProductPrice,
+                IsNew = p.IsNewRelease,
+                SubCategoriesId = p.SubCategoriesId,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+                categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
+                salePrice = p.Products.Any() ? p.Products.Min(p => p.SalePrices) : 0,
+
+            }).AsQueryable();
+
+            var productParents = await query.Skip(offset).Take(limit).ToListAsync();
+            response.StatusCode = 200;
+            response.Message = "Lấy dữ liệu thành công";
+            response.Data = productParents;
+            return response;
+        }
+        
     }
+       
 }

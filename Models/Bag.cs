@@ -7,7 +7,7 @@ public partial class Bag
 {
     public int BagId { get; set; }
 
-    public int? UserId { get; set; }
+    public string? UserId { get; set; }
 
     public int? ProductSizeId { get; set; }
 

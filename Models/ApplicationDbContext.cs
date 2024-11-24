@@ -83,7 +83,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.BagId).HasColumnName("bag_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
             entity.Property(e => e.ProductSizeId).HasColumnName("product_size_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
 
             entity.HasOne(d => d.ProductSize).WithMany(p => p.Bags)
                 .HasForeignKey(d => d.ProductSizeId)
@@ -195,7 +198,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.TotalPrice)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("total_price");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
 
             entity.HasOne(d => d.Supplier).WithMany(p => p.GoodsReceipts)
                 .HasForeignKey(d => d.SupplierId)
@@ -250,7 +256,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.TextSearch)
                 .HasMaxLength(255)
                 .HasColumnName("text_search");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.HistorySearches)
                 .HasForeignKey(d => d.UserId)
@@ -398,7 +407,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ProductReviewTitle)
                 .HasMaxLength(255)
                 .HasColumnName("product_review_Title");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductReviews)
                 .HasForeignKey(d => d.ProductId)
@@ -444,7 +456,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FlashSalePrice).HasColumnName("flash_sale_price");
             entity.Property(e => e.FlashSaleTimeFrameId).HasColumnName("flash_sale_time_frame_id");
             entity.Property(e => e.OriginalPrice).HasColumnName("original_price");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductParentId).HasColumnName("product_parent_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Sold).HasColumnName("sold");
             entity.Property(e => e.UpdatedAt)
@@ -456,10 +468,10 @@ public partial class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_register_flash_sale_product_flash_sale_time_frame");
 
-            entity.HasOne(d => d.Product).WithMany(p => p.RegisterFlashSaleProducts)
-                .HasForeignKey(d => d.ProductId)
+            entity.HasOne(d => d.ProductParent).WithMany(p => p.RegisterFlashSaleProducts)
+                .HasForeignKey(d => d.ProductParentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_register_flash_sale_product_product");
+                .HasConstraintName("fk_flash_sale_product_parent");
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -541,7 +553,10 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("user_account");
 
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.UserAddress).HasColumnName("user_address");
             entity.Property(e => e.UserEmail)
@@ -557,16 +572,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.UserLastName)
                 .HasMaxLength(100)
                 .HasColumnName("user_last_name");
-            entity.Property(e => e.UserMemberTier).HasColumnName("user_member_tier");
-            entity.Property(e => e.UserPassword)
-                .HasMaxLength(255)
-                .IsUnicode(false)
-                .HasColumnName("user_password");
             entity.Property(e => e.UserPhoneNumber)
                 .HasMaxLength(11)
                 .IsUnicode(false)
                 .HasColumnName("user_phone_number");
-            entity.Property(e => e.UserPoint).HasColumnName("user_point");
             entity.Property(e => e.UserUrl)
                 .HasColumnType("text")
                 .HasColumnName("user_url");
@@ -588,7 +597,10 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("user_discount_voucher");
 
             entity.Property(e => e.DiscountVoucherId).HasColumnName("discount_voucher_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
             entity.HasOne(d => d.DiscountVoucher).WithMany(p => p.UserDiscountVouchers)
@@ -612,7 +624,10 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
 
             entity.HasOne(d => d.Product).WithMany(p => p.UserFavoriteProducts)
                 .HasForeignKey(d => d.ProductId)

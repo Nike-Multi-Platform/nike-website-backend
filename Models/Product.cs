@@ -41,7 +41,5 @@ public partial class Product
 
     public virtual ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
 
-    public virtual ICollection<RegisterFlashSaleProduct> RegisterFlashSaleProducts { get; set; } = new List<RegisterFlashSaleProduct>();
-
     public virtual ICollection<UserFavoriteProduct> UserFavoriteProducts { get; set; } = new List<UserFavoriteProduct>();
 }

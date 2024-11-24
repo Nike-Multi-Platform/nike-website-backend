@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using nike_website_backend.Helpers;
 using nike_website_backend.Interfaces;
@@ -36,5 +37,16 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _productRepository.GetProductDetail(productId));
         }
+        [HttpGet("product-icons")]
+        public async Task<IActionResult> GetIcons([FromQuery] int page, [FromQuery] int limit)
+        {
+            return Ok(await _productRepository.GetIcons(page,limit));
+        }
+        [HttpGet("new-release")]
+        public async Task<IActionResult> GetNewRelease([FromQuery] int page, [FromQuery] int limit)
+        {
+            return Ok(await _productRepository.GetNewRelease(page,limit));
+        }
+
     }
 }

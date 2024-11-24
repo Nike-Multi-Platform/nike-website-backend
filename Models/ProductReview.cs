@@ -7,7 +7,7 @@ public partial class ProductReview
 {
     public int ProductReviewId { get; set; }
 
-    public int? UserId { get; set; }
+    public string? UserId { get; set; }
 
     public int? ProductId { get; set; }
 

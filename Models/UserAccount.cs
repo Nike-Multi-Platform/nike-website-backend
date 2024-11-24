@@ -5,29 +5,23 @@ namespace nike_website_backend.Models;
 
 public partial class UserAccount
 {
-    public int UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
-    public string? UserUsername { get; set; }
+    public string UserUsername { get; set; } = null!;
 
-    public string? UserPassword { get; set; }
+    public string UserGender { get; set; } = null!;
 
-    public string? UserGender { get; set; }
+    public string UserEmail { get; set; } = null!;
 
-    public string? UserEmail { get; set; }
+    public string UserPhoneNumber { get; set; } = null!;
 
-    public string? UserPhoneNumber { get; set; }
+    public string UserAddress { get; set; } = null!;
 
-    public string? UserAddress { get; set; }
+    public string UserFirstName { get; set; } = null!;
 
-    public string? UserFirstName { get; set; }
+    public string UserLastName { get; set; } = null!;
 
-    public string? UserLastName { get; set; }
-
-    public int? UserMemberTier { get; set; }
-
-    public int? UserPoint { get; set; }
-
-    public string? UserUrl { get; set; }
+    public string UserUrl { get; set; } = null!;
 
     public int RoleId { get; set; }
 

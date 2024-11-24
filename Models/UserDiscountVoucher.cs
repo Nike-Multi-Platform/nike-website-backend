@@ -7,7 +7,7 @@ public partial class UserDiscountVoucher
 {
     public int DiscountVoucherId { get; set; }
 
-    public int UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
     public int? Quantity { get; set; }
 

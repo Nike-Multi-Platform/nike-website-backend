@@ -9,7 +9,7 @@ public partial class RegisterFlashSaleProduct
 
     public int FlashSaleTimeFrameId { get; set; }
 
-    public int ProductId { get; set; }
+    public int ProductParentId { get; set; }
 
     public long? OriginalPrice { get; set; }
 
@@ -25,5 +25,5 @@ public partial class RegisterFlashSaleProduct
 
     public virtual FlashSaleTimeFrame FlashSaleTimeFrame { get; set; } = null!;
 
-    public virtual Product Product { get; set; } = null!;
+    public virtual ProductParent ProductParent { get; set; } = null!;
 }
