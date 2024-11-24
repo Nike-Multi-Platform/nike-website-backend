@@ -44,7 +44,7 @@ namespace nike_website_backend.Services
                 Status = t.Status,
                 FlashSale = t.FlashSale,
                 Products = t.RegisterFlashSaleProducts
-                    .OrderByDescending(r => r.Sold)
+                    .OrderBy(r => r.Sold)
                     .Take(limit)
                     .Select(r => new ProductParentDto
                     {
@@ -58,7 +58,11 @@ namespace nike_website_backend.Services
                         CreatedAt = r.ProductParent.CreatedAt,
                         UpdatedAt = r.ProductParent.UpdatedAt,
                         salePrice = r.FlashSalePrice,
-                        categoryWithObjectName = $"{r.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName}'s {r.ProductParent.SubCategories.Categories.CategoriesName}"
+                        categoryWithObjectName = $"{r.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName}'s {r.ProductParent.SubCategories.Categories.CategoriesName}",
+                        sold = r.Sold,
+                        quantity = r.Quantity,
+                        quantityInStock = r.ProductParent.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
+
                     }).ToList()
             }).AsNoTracking().AsQueryable();
 
@@ -76,7 +80,7 @@ namespace nike_website_backend.Services
                         Status = t.Status,
                         FlashSale = t.FlashSale,
                         Products = t.RegisterFlashSaleProducts
-                    .OrderByDescending(r => r.Sold)
+                    .OrderBy(r => r.Sold)
                     .Take(limit)
                     .Select(r => new ProductParentDto
                     {
@@ -90,7 +94,9 @@ namespace nike_website_backend.Services
                         CreatedAt = r.ProductParent.CreatedAt,
                         UpdatedAt = r.ProductParent.UpdatedAt,
                         salePrice = r.FlashSalePrice,
-                        categoryWithObjectName = $"{r.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName}'s {r.ProductParent.SubCategories.Categories.CategoriesName}"
+                        categoryWithObjectName = $"{r.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName}'s {r.ProductParent.SubCategories.Categories.CategoriesName}",
+                        sold = r.Sold,
+                        quantityInStock = r.ProductParent.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
                     }).ToList()
                     }
                 ).AsNoTracking().FirstOrDefaultAsync();
@@ -107,7 +113,7 @@ namespace nike_website_backend.Services
                         Status = t.Status,
                         FlashSale = t.FlashSale,
                         Products = t.RegisterFlashSaleProducts
-                    .OrderByDescending(r => r.Sold)
+                  .OrderBy(r => r.Sold)
                     .Take(limit)
                     .Select(r => new ProductParentDto
                     {
@@ -121,7 +127,9 @@ namespace nike_website_backend.Services
                         CreatedAt = r.ProductParent.CreatedAt,
                         UpdatedAt = r.ProductParent.UpdatedAt,
                         salePrice = r.FlashSalePrice,
-                        categoryWithObjectName = $"{r.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName}'s {r.ProductParent.SubCategories.Categories.CategoriesName}"
+                        categoryWithObjectName = $"{r.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName}'s {r.ProductParent.SubCategories.Categories.CategoriesName}",
+                        sold = r.Sold,
+                        quantityInStock = r.ProductParent.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
                     }).ToList()
                     }
                 ).AsNoTracking().FirstOrDefaultAsync();

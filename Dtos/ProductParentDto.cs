@@ -1,4 +1,5 @@
 using nike_website_backend.Models;
+using System.Numerics;
 
 namespace nike_website_backend.Dtos
 {
@@ -24,6 +25,8 @@ namespace nike_website_backend.Dtos
         public List<ProductDto> Products { get; set; }
         public  SubCategory? SubCategories { get; set; }
         public RegisterFlashSaleProduct RegisterFlashSaleProduct { get; set; }
-     
+        public long? sold { get; set; }
+        public int? quantity { get; set; }
+        public int? quantityInStock { get; set; }
     }
 }

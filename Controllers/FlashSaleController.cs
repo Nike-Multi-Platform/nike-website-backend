@@ -14,7 +14,7 @@ namespace nike_website_backend.Controllers
             _flashSaleRepository = iFlashSaleRepository;
         }
 
-        [HttpGet("/get-current-flash-sales")]
+        [HttpGet("get-current-flash-sales")]
         public async Task<IActionResult> getActiveFlashSale([FromQuery] int limit)
         {
             return Ok(await _flashSaleRepository.getActiveFlashSale(limit));

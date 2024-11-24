@@ -184,7 +184,7 @@ namespace nike_website_backend.Services
                 flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             }
-            var query = _context.ProductParents.Where(p => p.CreatedAt >= thirtyDaysAgo && p.CreatedAt <= currentDate).Select(p => new ProductParentDto
+            var query = _context.ProductParents.Where(p => p.CreatedAt >= thirtyDaysAgo && p.CreatedAt <= currentDate).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
             {
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
@@ -200,6 +200,8 @@ namespace nike_website_backend.Services
                 RegisterFlashSaleProduct = flashSaleTimeFrame != null
             ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
             : null,
+                quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
+
 
             }).AsQueryable();
 
@@ -227,7 +229,7 @@ namespace nike_website_backend.Services
 
             }
 
-            var query = _context.ProductParents.Where(p=>p.SubCategories.Categories.ProductObjectId == objectId).Select(p => new ProductParentDto
+            var query = _context.ProductParents.Where(p=>p.SubCategories.Categories.ProductObjectId == objectId).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
             {
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
@@ -243,6 +245,7 @@ namespace nike_website_backend.Services
                 RegisterFlashSaleProduct = flashSaleTimeFrame != null
         ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
         : null,
+                quantityInStock = p.Products.Sum(t=>t.ProductSizes.Sum(s=>s.Soluong)),
 
             }).AsQueryable();
             var productParents = await query.Skip(offset).Take(limit).ToListAsync();
