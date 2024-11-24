@@ -1,7 +1,9 @@
 ﻿using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Mvc;
+using nike_website_backend.Dtos;
 using nike_website_backend.Helpers;
 using nike_website_backend.Interfaces;
+using nike_website_backend.Models;
 
 namespace nike_website_backend.Controllers
 {
@@ -33,5 +35,22 @@ namespace nike_website_backend.Controllers
             return Ok(await _userAccountRepository.GenerateAndFetchIdToken(uid));
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto userinfo)
+        {
+            return Ok(await _userAccountRepository.RegisterAsync(userinfo));
+        }
+
+        [HttpPost("login-with-email-password")]
+        public async Task<IActionResult> LoginWithEmailPassword([FromBody] LoginDto loginInfo)
+        {
+            return Ok(await _userAccountRepository.LoginWithEmailPassword(loginInfo));
+        }
+
+        [HttpPost("login-with-google")]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] string googleIdToken)
+        {
+            return Ok(await _userAccountRepository.LoginWithGoogle(googleIdToken));
+        }
     }
 }
