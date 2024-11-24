@@ -9,7 +9,6 @@ namespace nike_website_backend.Dtos
         public int StatusCode { get; set; }
         public string Message { get; set; }
         public T Data { get; set; }
-        public Object DataResponse { get; set; }
-        public UserAccount User { get; set; }
+        public int TotalPages { get; internal set; }
     }
 }
