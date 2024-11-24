@@ -13,11 +13,11 @@ public partial class FlashSaleTimeFrame
 
     public DateTime? EndedAt { get; set; }
 
-    public string? Status { get; set; }
+    public string Status { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public virtual FlashSale FlashSale { get; set; } = null!;
 

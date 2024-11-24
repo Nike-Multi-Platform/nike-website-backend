@@ -137,20 +137,29 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FlashSaleId)
                 .ValueGeneratedNever()
                 .HasColumnName("flash_sale_id");
-            entity.Property(e => e.DiscountPercent)
-                .HasColumnType("decimal(18, 0)")
-                .HasColumnName("discount_percent");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
             entity.Property(e => e.EndedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("ended_at");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.StartedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("started_at");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.FlashSales)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK_flash_sale_product");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasDefaultValue("waiting")
+                .HasColumnName("status");
+            entity.Property(e => e.Thumbnail)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("thumbnail");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
         });
 
         modelBuilder.Entity<FlashSaleTimeFrame>(entity =>
@@ -161,6 +170,7 @@ public partial class ApplicationDbContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("flash_sale_time_frame_id");
             entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
             entity.Property(e => e.EndedAt)
@@ -172,8 +182,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("started_at");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasDefaultValue("waiting")
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
 

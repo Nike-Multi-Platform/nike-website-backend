@@ -18,11 +18,12 @@ namespace nike_website_backend.Dtos
         public bool? IsNew { get; set; }
 
         public int? ProductIconsId { get; set; }
-
+        public decimal? salePrice { get; set; }
         public string? categoryWithObjectName { get; set; }
         public ProductIconDto ProductIcon { get; set; }
         public List<ProductDto> Products { get; set; }
         public  SubCategory? SubCategories { get; set; }
-        public decimal? salePrice { get; set; }
+        public RegisterFlashSaleProduct RegisterFlashSaleProduct { get; set; }
+      
     }
 }

@@ -29,8 +29,6 @@ public partial class Product
 
     public int? TotalStock { get; set; }
 
-    public virtual ICollection<FlashSale> FlashSales { get; set; } = new List<FlashSale>();
-
     public virtual ICollection<GoodsReceiptDetail> GoodsReceiptDetails { get; set; } = new List<GoodsReceiptDetail>();
 
     public virtual ICollection<ProductImg> ProductImgs { get; set; } = new List<ProductImg>();

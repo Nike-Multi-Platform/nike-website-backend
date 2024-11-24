@@ -189,7 +189,7 @@ namespace nike_website_backend.Services
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
                 categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
-                salePrice = p.Products.Any() ? p.Products.Min(p => p.SalePrices) : 0,
+                salePrice =  p.Products.Any() ? p.Products.Min(p => p.SalePrices) : 0,
 
             }).AsQueryable();
 
