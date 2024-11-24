@@ -134,9 +134,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("flash_sale");
 
-            entity.Property(e => e.FlashSaleId)
-                .ValueGeneratedNever()
-                .HasColumnName("flash_sale_id");
+            entity.Property(e => e.FlashSaleId).HasColumnName("flash_sale_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -166,9 +164,7 @@ public partial class ApplicationDbContext : DbContext
         {
             entity.ToTable("flash_sale_time_frame");
 
-            entity.Property(e => e.FlashSaleTimeFrameId)
-                .ValueGeneratedNever()
-                .HasColumnName("flash_sale_time_frame_id");
+            entity.Property(e => e.FlashSaleTimeFrameId).HasColumnName("flash_sale_time_frame_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -460,10 +456,9 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("register_flash_sale_product");
 
-            entity.Property(e => e.RegisterFlashSaleProduct1)
-                .ValueGeneratedNever()
-                .HasColumnName("register_flash_sale_product");
+            entity.Property(e => e.RegisterFlashSaleProduct1).HasColumnName("register_flash_sale_product");
             entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
             entity.Property(e => e.FlashSalePrice).HasColumnName("flash_sale_price");
@@ -473,6 +468,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Sold).HasColumnName("sold");
             entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
 

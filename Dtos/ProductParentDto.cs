@@ -24,6 +24,6 @@ namespace nike_website_backend.Dtos
         public List<ProductDto> Products { get; set; }
         public  SubCategory? SubCategories { get; set; }
         public RegisterFlashSaleProduct RegisterFlashSaleProduct { get; set; }
-      
+     
     }
 }

@@ -11,5 +11,6 @@ namespace nike_website_backend.Interfaces
         Task<Response<ProductDetailDto>> GetProductDetail(int productId);
         Task<Response<List<ProductIcon>>> GetIcons(int page,int limit);
         Task<Response<List<ProductParentDto>>> GetNewRelease(int page, int limit);
+        Task<Response<List<ProductParentDto>>> GetProductByObjectID(int page, int limit, int objectId);
     }
 }

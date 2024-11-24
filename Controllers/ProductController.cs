@@ -47,6 +47,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _productRepository.GetNewRelease(page,limit));
         }
+        [HttpGet("products-by-object-id")]
+        public async Task<IActionResult> GetProductByObjectID([FromQuery] int page, [FromQuery] int limit,[FromQuery] int objectId)
+        {
+            return Ok(await _productRepository.GetProductByObjectID(page, limit,objectId));
+        }
 
     }
 }

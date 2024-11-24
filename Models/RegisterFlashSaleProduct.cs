@@ -19,9 +19,9 @@ public partial class RegisterFlashSaleProduct
 
     public long? Sold { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public virtual FlashSaleTimeFrame FlashSaleTimeFrame { get; set; } = null!;
 
