@@ -7,6 +7,8 @@ public partial class UserAccount
 {
     public string UserId { get; set; } = null!;
 
+    public string? Password { get; set; }
+
     public string UserUsername { get; set; } = null!;
 
     public string UserGender { get; set; } = null!;
@@ -38,4 +40,8 @@ public partial class UserAccount
     public virtual ICollection<UserDiscountVoucher> UserDiscountVouchers { get; set; } = new List<UserDiscountVoucher>();
 
     public virtual ICollection<UserFavoriteProduct> UserFavoriteProducts { get; set; } = new List<UserFavoriteProduct>();
+
+    public virtual ICollection<UserOrder> UserOrders { get; set; } = new List<UserOrder>();
+
+    public virtual ICollection<UserWallet> UserWallets { get; set; } = new List<UserWallet>();
 }

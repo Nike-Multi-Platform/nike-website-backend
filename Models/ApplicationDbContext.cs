@@ -47,6 +47,10 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<RegisterFlashSaleProduct> RegisterFlashSaleProducts { get; set; }
 
+    public virtual DbSet<ReturnRequest> ReturnRequests { get; set; }
+
+    public virtual DbSet<ReturnRequestImg> ReturnRequestImgs { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Size> Sizes { get; set; }
@@ -66,6 +70,12 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<UserOrder> UserOrders { get; set; }
 
     public virtual DbSet<UserOrderProduct> UserOrderProducts { get; set; }
+
+    public virtual DbSet<UserOrderStatus> UserOrderStatuses { get; set; }
+
+    public virtual DbSet<UserWallet> UserWallets { get; set; }
+
+    public virtual DbSet<UserWalletTransaction> UserWalletTransactions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=DefaultConnection");
@@ -372,7 +382,9 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
+            entity.Property(e => e.Height).HasColumnName("height");
             entity.Property(e => e.IsNewRelease).HasColumnName("is_new_release");
+            entity.Property(e => e.Length).HasColumnName("length");
             entity.Property(e => e.ProductIconsId).HasColumnName("product_icons_id");
             entity.Property(e => e.ProductParentName)
                 .HasMaxLength(100)
@@ -388,13 +400,17 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
+            entity.Property(e => e.Weight).HasColumnName("weight");
+            entity.Property(e => e.Width).HasColumnName("width");
 
             entity.HasOne(d => d.ProductIcons).WithMany(p => p.ProductParents)
                 .HasForeignKey(d => d.ProductIconsId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PP_PI");
 
             entity.HasOne(d => d.SubCategories).WithMany(p => p.ProductParents)
                 .HasForeignKey(d => d.SubCategoriesId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_pr_sc");
         });
 
@@ -483,6 +499,55 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("fk_flash_sale_product_parent");
         });
 
+        modelBuilder.Entity<ReturnRequest>(entity =>
+        {
+            entity.HasKey(e => e.ReturnRequestId).HasName("PK__return_r__C456CAE1806E7B14");
+
+            entity.ToTable("return_request");
+
+            entity.Property(e => e.ReturnRequestId).HasColumnName("return_request_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.ResolverId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("resolver_id");
+            entity.Property(e => e.ReturnRequestReason)
+                .HasMaxLength(255)
+                .HasColumnName("return_request_reason");
+            entity.Property(e => e.StatusId)
+                .HasDefaultValue(0)
+                .HasColumnName("status_id");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+            entity.Property(e => e.UserOrderId).HasColumnName("user_order_id");
+
+            entity.HasOne(d => d.UserOrder).WithMany(p => p.ReturnRequests)
+                .HasForeignKey(d => d.UserOrderId)
+                .HasConstraintName("fk_rr_uo");
+        });
+
+        modelBuilder.Entity<ReturnRequestImg>(entity =>
+        {
+            entity.HasKey(e => e.ReturnRequestImgsId).HasName("PK__return_r__169F90B758E5BE51");
+
+            entity.ToTable("return_request_imgs");
+
+            entity.Property(e => e.ReturnRequestImgsId).HasColumnName("return_request_imgs_id");
+            entity.Property(e => e.ImgUrl)
+                .HasMaxLength(255)
+                .HasColumnName("img_url");
+            entity.Property(e => e.ReturnRequestId).HasColumnName("return_request_id");
+
+            entity.HasOne(d => d.ReturnRequest).WithMany(p => p.ReturnRequestImgs)
+                .HasForeignKey(d => d.ReturnRequestId)
+                .HasConstraintName("fk_rr_rri");
+        });
+
         modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.RoleId).HasName("PK__roles__760965CCD277F87B");
@@ -566,6 +631,10 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("user_id");
+            entity.Property(e => e.Password)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("password");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.UserAddress).HasColumnName("user_address");
             entity.Property(e => e.UserEmail)
@@ -660,32 +729,76 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("address");
             entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
+            entity.Property(e => e.DiscountPrice)
+                .HasColumnType("money")
+                .HasColumnName("discount_price");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .HasColumnName("email");
+            entity.Property(e => e.FinalPrice)
+                .HasColumnType("money")
+                .HasColumnName("final_price");
             entity.Property(e => e.FirstName)
                 .HasMaxLength(60)
                 .HasColumnName("first_name");
+            entity.Property(e => e.GhnService)
+                .HasMaxLength(120)
+                .HasColumnName("ghn_service");
+            entity.Property(e => e.IsCanceledBy).HasColumnName("is_canceled_by");
             entity.Property(e => e.IsProcessed).HasColumnName("is_processed");
             entity.Property(e => e.IsReviewed).HasColumnName("is_reviewed");
             entity.Property(e => e.LastName)
                 .HasMaxLength(60)
                 .HasColumnName("last_name");
+            entity.Property(e => e.OrderCode)
+                .HasMaxLength(120)
+                .IsUnicode(false)
+                .HasColumnName("order_code");
+            entity.Property(e => e.OrderCodeReturn)
+                .HasMaxLength(120)
+                .IsUnicode(false)
+                .HasColumnName("order_code_return");
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(255)
                 .HasColumnName("payment_method");
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(255)
                 .HasColumnName("phone_number");
+            entity.Property(e => e.ReturnExpirationDate)
+                .HasColumnType("datetime")
+                .HasColumnName("return_expiration_date");
+            entity.Property(e => e.ShippingFee)
+                .HasColumnType("money")
+                .HasColumnName("shipping_fee");
             entity.Property(e => e.TotalPrice)
                 .HasColumnType("money")
                 .HasColumnName("total_price");
+            entity.Property(e => e.TotalQuantity).HasColumnName("total_quantity");
             entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
+            entity.Property(e => e.UserOrderStatusId).HasColumnName("user_order_status_id");
+            entity.Property(e => e.VouchersApplied)
+                .HasMaxLength(120)
+                .HasColumnName("vouchers_applied");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserOrders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_uo_uc");
+
+            entity.HasOne(d => d.UserOrderStatus).WithMany(p => p.UserOrders)
+                .HasForeignKey(d => d.UserOrderStatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_uo_uos");
         });
 
         modelBuilder.Entity<UserOrderProduct>(entity =>
@@ -707,6 +820,71 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.UserOrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_uop_uo");
+        });
+
+        modelBuilder.Entity<UserOrderStatus>(entity =>
+        {
+            entity.HasKey(e => e.UserOrderStatusId).HasName("PK__user_ord__3E79E7F18C016521");
+
+            entity.ToTable("user_order_status");
+
+            entity.Property(e => e.UserOrderStatusId).HasColumnName("user_order_status_id");
+            entity.Property(e => e.UserOrderStatusName)
+                .HasMaxLength(255)
+                .HasColumnName("user_order_status_name");
+        });
+
+        modelBuilder.Entity<UserWallet>(entity =>
+        {
+            entity.HasKey(e => e.UserWalletId).HasName("PK__user_wal__0612ED8D6B40F438");
+
+            entity.ToTable("user_wallet");
+
+            entity.Property(e => e.UserWalletId).HasColumnName("user_wallet_id");
+            entity.Property(e => e.Balance)
+                .HasDefaultValue(0L)
+                .HasColumnName("balance");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserWallets)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("fk_uw_uc");
+        });
+
+        modelBuilder.Entity<UserWalletTransaction>(entity =>
+        {
+            entity.HasKey(e => e.WalletTransactionId).HasName("PK__user_wal__1C2AF68166B9C2C8");
+
+            entity.ToTable("user_wallet_transactions");
+
+            entity.Property(e => e.WalletTransactionId).HasColumnName("wallet_transaction_id");
+            entity.Property(e => e.Amount)
+                .HasDefaultValue(0L)
+                .HasColumnName("amount");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.TransactionDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("transaction_date");
+            entity.Property(e => e.TransactionType)
+                .HasMaxLength(255)
+                .HasColumnName("transaction_type");
+            entity.Property(e => e.UserWalletId).HasColumnName("user_wallet_id");
+
+            entity.HasOne(d => d.UserWallet).WithMany(p => p.UserWalletTransactions)
+                .HasForeignKey(d => d.UserWalletId)
+                .HasConstraintName("fk_uwt_uw");
         });
 
         OnModelCreatingPartial(modelBuilder);
