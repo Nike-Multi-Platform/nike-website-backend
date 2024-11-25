@@ -27,6 +27,7 @@ namespace nike_website_backend.Services
                 SizeAndFit = p.ProductSizeAndFit,
                 StyleCode = p.ProductStyleCode,
                 ColorShown = p.ProductColorShown,
+                salePrice = p.SalePrices,
                 ProductImageDtos = p.ProductImgs.Select(p => new ProductImageDto
                 {
                     ProductImageId = p.ProductImgId,
@@ -86,8 +87,19 @@ namespace nike_website_backend.Services
         public async Task<Response<ProductParentDto>> GetProductParentDetail(int productParentId)
         {
             Response<ProductParentDto> response = new Response<ProductParentDto>();
+            var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+            var currentDate = DateTime.Now;
+            FlashSaleTimeFrame flashSaleTimeFrame = null;
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+
+            if (flashSale != null)
+            {
+                flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+
+            }
             var productParentDto = await _context.ProductParents.Where(p => p.ProductParentId == productParentId).Select(p => new ProductParentDto
             {
+
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
                 ProductIcon = new ProductIconDto
@@ -96,16 +108,28 @@ namespace nike_website_backend.Services
                     ProductIconName = p.ProductIcons.IconName,
                     Thumbnail = p.ProductIcons.Thumbnail
                 },
-                Products = p.Products.Select(p => new ProductDto
+                Products = p.Products.Select(t => new ProductDto
                 {
-                    ProductId = p.ProductId,
-                    ProductImage = p.ProductImg
-                    // ... more properties
+                    ProductId = t.ProductId,
+                    ProductImage = t.ProductImg,
+                   stock = t.ProductSizes.Any() ? t.ProductSizes.Sum(x=>x.Soluong) : 0
                 }).ToList(),
                 Thumbnail = p.Thumbnail,
                 ProductPrice = p.ProductPrice,
-                IsNew = p.IsNewRelease
+                IsNew = p.IsNewRelease,
+                categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
+                RegisterFlashSaleProduct = flashSaleTimeFrame != null
+            ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
+            : null,
+                quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
             }).FirstOrDefaultAsync();
+
+            if(productParentDto == null)
+            {
+                response.StatusCode = 404;
+                response.Message = "Không tìm thấy sản phẩm";
+                response.Data = null;
+            }
 
             response.StatusCode = 200;
             response.Message = "Lấy dữ liệu thành công";

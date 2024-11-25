@@ -11,7 +11,7 @@ namespace nike_website_backend.Dtos
         public List<ProductImageDto> ProductImageDtos { get; set; }
         public List<ProductSizeDto> ProductSizeDtos { get; set; }
         public List<ProductReviewDto> ProductReviewDtos { get; set; }
-
+        public decimal? salePrice { get; set; }
         // public string Description { get; set; }
         // ... more properties
     }
