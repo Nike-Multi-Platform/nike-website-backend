@@ -52,6 +52,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _productRepository.GetProductByObjectID(page, limit,objectId));
         }
+        [HttpGet("product-reviews/{productId}")]
+        public async Task<IActionResult> getReviewsOfColor(int productId, [FromQuery] int page, [FromQuery] int limit, [FromQuery] string sortBy, [FromQuery] int rating)
+        {
+            return Ok(await _productRepository.getReviewsOfColor(productId,page,limit,sortBy,rating));
+        }
 
     }
 }

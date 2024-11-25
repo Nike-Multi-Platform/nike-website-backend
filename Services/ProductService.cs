@@ -22,7 +22,7 @@ namespace nike_website_backend.Services
             var ProductDetailDto = await _context.Products.Where(p => p.ProductId == productId).Select(p => new ProductDetailDto
             {
                 ProductId = p.ProductId,
-                MoreInfo = p.ProductMoreInfo,
+                MoreInfo = p.ProductDescription,
                 ProductImage = p.ProductImg,
                 SizeAndFit = p.ProductSizeAndFit,
                 StyleCode = p.ProductStyleCode,
@@ -43,14 +43,7 @@ namespace nike_website_backend.Services
                         SizeName = p.Size.SizeName
                     }
                 }).ToList(),
-                ProductReviewDtos = p.ProductReviews.Select(p => new ProductReviewDto
-                {
-                    ProductReviewId = p.ProductReviewId,
-                    ProductReviewTitle = p.ProductReviewTitle,
-                    ProductReviewContent = p.ProductReviewContent,
-                    ProductRating = p.ProductReviewRate,
-                    ProductReviewDate = p.ProductReviewTime
-                }).ToList()
+                
             }).FirstOrDefaultAsync();
 
             response.StatusCode = 200;
@@ -281,6 +274,40 @@ namespace nike_website_backend.Services
             res.TotalPages = totalPages;
             return res;
         }
+
+        public async Task<Response<List<ProductReviewDto>>> getReviewsOfColor(int productId,int page,int limit, string sortBy,double rating)
+        {
+            var offset = (page - 1) * limit;
+            Response<List<ProductReviewDto>> res = new Response<List<ProductReviewDto>>();
+            var query = _context.ProductReviews.Where(x => x.ProductId == productId &&  (x.ProductReviewRate == rating || rating == 6)).Select(r => new ProductReviewDto
+            {
+                ProductReviewId = r.ProductReviewId,
+                ProductRating = r.ProductReviewRate,
+                ProductReviewContent = r.ProductReviewContent,
+                ProductReviewDate = r.ProductReviewTime,
+                ProductReviewTitle = r.ProductReviewTitle,
+                UserAccount = r.User
+            });
+            query = sortBy switch
+            {
+                "newest" => query.OrderByDescending(r => r.ProductReviewDate),
+                "oldest" => query.OrderBy(r => r.ProductReviewDate),
+                "highest-rating" => query.OrderByDescending(r => r.ProductRating),
+                "lowest-rating" => query.OrderBy(r => r.ProductRating),
+                _ => query // Không sắp xếp nếu `sortBy` không hợp lệ
+            };
+
+            var reviews = await query.Skip(offset).Take(limit).ToListAsync();
+            var count = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)count / limit);
+            res.StatusCode = 200;
+            res.Data = reviews;
+            res.TotalPages = totalPages;
+            return res;
+
+
+        }
+        
     }
        
 }
