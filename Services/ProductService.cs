@@ -43,7 +43,7 @@ namespace nike_website_backend.Services
                         SizeName = p.Size.SizeName
                     }
                 }).ToList(),
-                
+
             }).FirstOrDefaultAsync();
 
             response.StatusCode = 200;
@@ -105,7 +105,7 @@ namespace nike_website_backend.Services
                 {
                     ProductId = t.ProductId,
                     ProductImage = t.ProductImg,
-                   stock = t.ProductSizes.Any() ? t.ProductSizes.Sum(x=>x.Soluong) : 0
+                    stock = t.ProductSizes.Any() ? t.ProductSizes.Sum(x => x.Soluong) : 0
                 }).ToList(),
                 Thumbnail = p.Thumbnail,
                 ProductPrice = p.ProductPrice,
@@ -117,7 +117,7 @@ namespace nike_website_backend.Services
                 quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
             }).FirstOrDefaultAsync();
 
-            if(productParentDto == null)
+            if (productParentDto == null)
             {
                 response.StatusCode = 404;
                 response.Message = "Không tìm thấy sản phẩm";
@@ -197,7 +197,8 @@ namespace nike_website_backend.Services
             FlashSaleTimeFrame flashSaleTimeFrame = null;
             var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
-            if (flashSale != null) {
+            if (flashSale != null)
+            {
                 flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             }
@@ -232,9 +233,9 @@ namespace nike_website_backend.Services
             return response;
         }
 
-        public async Task<Response<List<ProductParentDto>>> GetProductByObjectID(int page, int limit,int objectId)
+        public async Task<Response<List<ProductParentDto>>> GetProductByObjectID(int page, int limit, int objectId)
         {
-            var offset = (page-1)*limit;
+            var offset = (page - 1) * limit;
             Response<List<ProductParentDto>> res = new Response<List<ProductParentDto>>();
             FlashSaleTimeFrame flashSaleTimeFrame = null;
             var currentDate = DateTime.Now;
@@ -246,7 +247,7 @@ namespace nike_website_backend.Services
 
             }
 
-            var query = _context.ProductParents.Where(p=>p.SubCategories.Categories.ProductObjectId == objectId).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
+            var query = _context.ProductParents.Where(p => p.SubCategories.Categories.ProductObjectId == objectId).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
             {
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
@@ -262,7 +263,7 @@ namespace nike_website_backend.Services
                 RegisterFlashSaleProduct = flashSaleTimeFrame != null
         ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
         : null,
-                quantityInStock = p.Products.Sum(t=>t.ProductSizes.Sum(s=>s.Soluong)),
+                quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
 
             }).AsQueryable();
             var productParents = await query.Skip(offset).Take(limit).ToListAsync();
@@ -275,11 +276,11 @@ namespace nike_website_backend.Services
             return res;
         }
 
-        public async Task<Response<List<ProductReviewDto>>> getReviewsOfColor(int productId,int page,int limit, string sortBy,double rating)
+        public async Task<Response<List<ProductReviewDto>>> getReviewsOfColor(int productId, int page, int limit, string sortBy, double rating)
         {
             var offset = (page - 1) * limit;
             Response<List<ProductReviewDto>> res = new Response<List<ProductReviewDto>>();
-            var query = _context.ProductReviews.Where(x => x.ProductId == productId &&  (x.ProductReviewRate == rating || rating == 6)).Select(r => new ProductReviewDto
+            var query = _context.ProductReviews.Where(x => x.ProductId == productId && (x.ProductReviewRate == rating || rating == 6)).Select(r => new ProductReviewDto
             {
                 ProductReviewId = r.ProductReviewId,
                 ProductRating = r.ProductReviewRate,
@@ -307,7 +308,100 @@ namespace nike_website_backend.Services
 
 
         }
+
+        public async Task<Response<List<ProductParentDto>>> getRecommendProductParent(string? userId, int limit)
+        {
+            Response<List<ProductParentDto>> res = new Response<List<ProductParentDto>>();
+            List<HistorySearch> historySearch = new List<HistorySearch>();
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                historySearch = _context.HistorySearches
+                    .Where(p => p.UserId == userId)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Take(10)
+                    .ToList();
+            }
+
+            FlashSaleTimeFrame flashSaleTimeFrame = null;
+            var currentDate = DateTime.Now;
+            var flashSale = await _context.FlashSales
+                .Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active"))
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (flashSale != null)
+            {
+                flashSaleTimeFrame = await _context.FlashSaleTimeFrames
+                    .Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active"))
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+            }
+
+            var query = _context.ProductParents.Select(p => new ProductParentDto
+            {
+                ProductParentId = p.ProductParentId,
+                ProductParentName = p.ProductParentName,
+                ProductIconsId = p.ProductIconsId,
+                Thumbnail = p.Thumbnail,
+                ProductPrice = p.ProductPrice,
+                IsNew = p.IsNewRelease,
+                SubCategoriesId = p.SubCategoriesId,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+                categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
+                salePrice =  p.Products.Any(pr => pr.SalePrices > 0)
+    ? p.Products.Where(pr => pr.SalePrices > 0).Min(pr => pr.SalePrices)
+    : 0,
+
+                RegisterFlashSaleProduct = flashSaleTimeFrame != null
+                    ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
+                    : null,
+                quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
+            }).AsQueryable();
+
+            List<ProductParentDto> prioritizedProducts = new();
+            List<ProductParentDto> otherProducts = new();
+
+            if (historySearch.Any())
+            {
+                var searchKeywords = historySearch.Select(h => h.TextSearch).Distinct().ToList();
+
+                // Lọc sản phẩm có liên quan đến lịch sử tìm kiếm
+                prioritizedProducts = await query
+                    .Where(p => searchKeywords.Any(keyword => p.ProductParentName.Contains(keyword)))
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                // Loại bỏ các sản phẩm đã được ưu tiên
+                otherProducts = await query
+                    .Where(p => !searchKeywords.Any(keyword => p.ProductParentName.Contains(keyword)))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            else
+            {
+           
+                otherProducts = await query.AsNoTracking().ToListAsync();
+            }
+
+            var random = new Random();
+
         
+            prioritizedProducts = prioritizedProducts.OrderBy(_ => random.Next()).ToList();
+            otherProducts = otherProducts.OrderBy(_ => random.Next()).ToList();
+
+        
+            var finalResult = prioritizedProducts.Concat(otherProducts).Take(limit).ToList();
+
+            res.StatusCode = 200;
+            res.Message = "Lấy dữ liệu thành công";
+            res.Data = finalResult;
+
+            return res;
+        }
+
     }
-       
-}
+
+
+    }

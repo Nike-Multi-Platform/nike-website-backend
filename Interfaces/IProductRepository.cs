@@ -13,5 +13,6 @@ namespace nike_website_backend.Interfaces
         Task<Response<List<ProductParentDto>>> GetNewRelease(int page, int limit);
         Task<Response<List<ProductParentDto>>> GetProductByObjectID(int page, int limit, int objectId);
         Task<Response<List<ProductReviewDto>>> getReviewsOfColor(int productId, int page, int limit, string sortBy, double rating);
+        Task<Response<List<ProductParentDto>>> getRecommendProductParent(string? userId, int limit);
     }
 }

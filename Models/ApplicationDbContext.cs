@@ -47,6 +47,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<RegisterFlashSaleProduct> RegisterFlashSaleProducts { get; set; }
 
+    public virtual DbSet<RequestType> RequestTypes { get; set; }
+
     public virtual DbSet<ReturnRequest> ReturnRequests { get; set; }
 
     public virtual DbSet<ReturnRequestImg> ReturnRequestImgs { get; set; }
@@ -272,6 +274,10 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("history_search");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
             entity.Property(e => e.TextSearch)
                 .HasMaxLength(255)
                 .HasColumnName("text_search");
@@ -282,6 +288,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.HistorySearches)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__history_s__user___5EBF139D");
         });
 
@@ -499,6 +506,18 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("fk_flash_sale_product_parent");
         });
 
+        modelBuilder.Entity<RequestType>(entity =>
+        {
+            entity.HasKey(e => e.RequestTypeId).HasName("PK__request___C24DD950F43292E4");
+
+            entity.ToTable("request_types");
+
+            entity.Property(e => e.RequestTypeId).HasColumnName("request_type_id");
+            entity.Property(e => e.RequestTypeName)
+                .HasMaxLength(255)
+                .HasColumnName("request_type_name");
+        });
+
         modelBuilder.Entity<ReturnRequest>(entity =>
         {
             entity.HasKey(e => e.ReturnRequestId).HasName("PK__return_r__C456CAE1806E7B14");
@@ -510,6 +529,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
+            entity.Property(e => e.RequestTypeId).HasColumnName("request_type_id");
             entity.Property(e => e.ResolverId)
                 .HasMaxLength(255)
                 .IsUnicode(false)
@@ -517,17 +537,21 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ReturnRequestReason)
                 .HasMaxLength(255)
                 .HasColumnName("return_request_reason");
-            entity.Property(e => e.StatusId)
-                .HasDefaultValue(0)
-                .HasColumnName("status_id");
+            entity.Property(e => e.StatusId).HasColumnName("status_id");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
             entity.Property(e => e.UserOrderId).HasColumnName("user_order_id");
 
+            entity.HasOne(d => d.RequestType).WithMany(p => p.ReturnRequests)
+                .HasForeignKey(d => d.RequestTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_rr_rt");
+
             entity.HasOne(d => d.UserOrder).WithMany(p => p.ReturnRequests)
                 .HasForeignKey(d => d.UserOrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_rr_uo");
         });
 

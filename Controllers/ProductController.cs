@@ -57,6 +57,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _productRepository.getReviewsOfColor(productId,page,limit,sortBy,rating));
         }
+        [HttpGet("recommendation")]
+        public async Task<IActionResult> getRecommendProductParent([FromQuery] string? userId, [FromQuery] int limit)
+        {
+            return Ok(await _productRepository.getRecommendProductParent(userId,limit));
+        }
 
     }
 }
