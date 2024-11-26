@@ -8,7 +8,6 @@ namespace nike_website_backend.Dtos
         public string Password { get; set; } = null!;
         public string UserGender { get; set; } = null!;
         public string UserPhoneNumber { get; set; } = null!;
-        public string UserAddress { get; set; } = null!;
         public string UserFirstName { get; set; } = null!;
         public string UserLastName { get; set; } = null!;
     }

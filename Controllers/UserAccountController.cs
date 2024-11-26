@@ -48,9 +48,14 @@ namespace nike_website_backend.Controllers
         }
 
         [HttpPost("login-with-google")]
-        public async Task<IActionResult> LoginWithGoogle([FromBody] string googleIdToken)
+        public async Task<IActionResult> LoginWithGoogle([FromBody] string idToken)
         {
-            return Ok(await _userAccountRepository.LoginWithGoogle(googleIdToken));
+            return Ok(await _userAccountRepository.LoginWithGoogle(idToken));
+        }
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] string UserId)
+        {
+            return Ok(await _userAccountRepository.Logout(UserId));
         }
     }
 }
