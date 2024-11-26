@@ -1,4 +1,5 @@
-﻿using FirebaseAdmin;
+﻿using Azure.Core;
+using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Data.SqlClient;
@@ -40,6 +41,18 @@ namespace nike_website_backend.Services
             try
             {
                 FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+                // Lấy thời điểm thu hồi token
+                DateTime revokedTime = await FirebaseAuth.DefaultInstance.GetUserAsync(decodedToken.Uid)
+                    .ContinueWith(task => task.Result.TokensValidAfterTimestamp);
+
+                // So sánh thời gian tạo token với thời điểm token bị thu hồi
+                DateTime authTime = DateTimeOffset.FromUnixTimeSeconds(decodedToken.IssuedAtTimeSeconds).UtcDateTime;
+                if (authTime < revokedTime)
+                {
+                    response.Message = "ID token has been revoked.";
+                    response.StatusCode = 403; // Forbidden
+                    return response;
+                }
                 // get user info from database
                 var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserId == decodedToken.Uid);
                 if (user == null)
@@ -209,6 +222,8 @@ namespace nike_website_backend.Services
 
         public async Task<Response<object>> RegisterAsync(RegisterDto userinfo)
         {
+            // console.log(userinfo);
+            Console.WriteLine(userinfo);
             var response = new Response<object>();
 
             // Validate required fields
@@ -229,7 +244,7 @@ namespace nike_website_backend.Services
                 try
                 {
                     await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(userinfo.UserEmail);
-                    response.Message = "User already exists";
+                    response.Message = "Email này đã được sử dụng";
                     response.StatusCode = 400;
                     return response;
                 }
@@ -280,7 +295,7 @@ namespace nike_website_backend.Services
                     UserLastName = userinfo.UserLastName,
                     UserGender = userinfo.UserGender,
                     UserPhoneNumber = userinfo.UserPhoneNumber,
-                    UserAddress = userinfo.UserAddress,
+                    UserAddress = "",
                     UserUrl = "",
                     RoleId = 1,
                     UserUsername = userRecord.Email.Split('@')[0] + Guid.NewGuid().ToString().Substring(0, 5)
@@ -290,7 +305,7 @@ namespace nike_website_backend.Services
                 await _context.SaveChangesAsync();
 
                 // Prepare response
-                response.Message = "User created successfully. Please check your email to verify your account.";
+                response.Message = "Đăng kí thành công. Vui lòng kiểm tra email để xác thực tài khoản";
                 response.StatusCode = 200;
                 object data = new
                 {
@@ -347,7 +362,7 @@ namespace nike_website_backend.Services
                 var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserEmail == loginInfo.Email);
                 if (user == null)
                 {
-                    response.Message = "User not found";
+                    response.Message = "Không tìm thấy tài khoản";
                     response.StatusCode = 404; // Not Found
                     return response;
                 }
@@ -358,7 +373,7 @@ namespace nike_website_backend.Services
                 var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserUsername == loginInfo.Email);
                 if (user == null)
                 {
-                    response.Message = "Username not found.";
+                    response.Message = "Thông tin đăng nhập sai";
                     response.StatusCode = 404; // Not Found
                     return response;
                 }
@@ -399,11 +414,15 @@ namespace nike_website_backend.Services
                         // Kiểm tra thông báo lỗi cụ thể từ Firebase
                         if (errorMessage == "EMAIL_NOT_FOUND")
                         {
-                            response.Message = "Email not found.";
+                            response.Message = "Tài khoản hoặc mật khẩu không chính xác";
                         }
                         else if (errorMessage == "INVALID_PASSWORD")
                         {
-                            response.Message = "Invalid password.";
+                            response.Message = "Tài khoản hoặc mật khẩu không chính xác";
+                        }
+                        else if (errorMessage == "INVALID_LOGIN_CREDENTIALS")
+                        {
+                            response.Message = "Tài khoản hoặc mật khẩu không chính xác";
                         }
                         else
                         {
@@ -426,14 +445,14 @@ namespace nike_website_backend.Services
                         var user = await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(user_email);
                         if (!user.EmailVerified)
                         {
-                            response.Message = "Email is not verified. Please check your email";
+                            response.Message = "Hãy kiểm tra email để xác thực tài khoản";
                             response.StatusCode = 400;
                             return response;
                         }
                         if (idTokenResponse.StatusCode == 200)
                         {
                             response.Data = idTokenResponse.Data;
-                            response.Message = "Login successful";
+                            response.Message = "Đăng nhập thành công";
                             response.StatusCode = 200; // OK
                         }
                         else
@@ -462,9 +481,109 @@ namespace nike_website_backend.Services
             return response;
         }
 
-        public Task<Response<string>> LoginWithGoogle(string googleIdToken)
+        public async Task<Response<string>> LoginWithGoogle(string idToken)
         {
-            throw new NotImplementedException();
+            // log idToken to debug
+            Console.WriteLine(idToken);
+            Response<string> response = new Response<string>();
+            if (string.IsNullOrEmpty(idToken))
+            {
+                response.Message = "idToken is required.";
+                response.StatusCode = 400;
+                return response;
+            }
+
+            try
+            {
+                // Verify token
+                FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+
+                // Extract claims
+                string? email = decodedToken.Claims.TryGetValue("email", out var emailClaim) ? emailClaim.ToString() : null;
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    response.Message = "Email not found in the token.";
+                    response.StatusCode = 400;
+                    return response;
+                }
+
+                // Check if user exists
+                var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserId == decodedToken.Uid);
+
+                if (user == null)
+                {
+                    // Create new user
+                    string baseUsername = email.Split('@')[0];
+                    string uniqueUsername = baseUsername;
+                    int counter = 0;
+                    while (await _context.UserAccounts.AnyAsync(x => x.UserUsername == uniqueUsername))
+                    {
+                        counter++;
+                        uniqueUsername = $"{baseUsername}{counter}";
+                    }
+
+                    var newUser = new UserAccount
+                    {
+                        UserId = decodedToken.Uid,
+                        UserEmail = email,
+                        UserGender = "Khác",
+                        UserPhoneNumber = "",
+                        UserAddress = "",
+                        UserUrl = "",
+                        RoleId = 1,
+                        UserFirstName = decodedToken.Claims.TryGetValue("name", out var name) && name != null ? name.ToString() : "",
+                        UserLastName = decodedToken.Claims.TryGetValue("family_name", out var familyName) && familyName != null ? familyName.ToString() : "",
+                        UserUsername = email.Split('@')[0] + Guid.NewGuid().ToString().Substring(0, 5)
+                    };
+
+                    _context.UserAccounts.Add(newUser);
+                    await _context.SaveChangesAsync();
+
+                    response.Message = "Tạo thành công tài khoản mới bằng Google.";
+                    response.Data = idToken;
+                    response.StatusCode = 200;
+                }
+                else
+                {
+                    response.Message = "Đăng nhập thành công.";
+                    response.Data = idToken;
+                    response.StatusCode = 200;
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                return response;
+            }
+        }
+
+        public async Task<Response<string>> Logout(string UserId)
+        {
+            Response<string> response = new Response<string>();
+            if (string.IsNullOrEmpty(UserId))
+            {
+                response.Message = "UserId is required.";
+                response.StatusCode = 400;
+                return response;
+            }
+
+            try
+            {
+                await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(UserId);
+                response.Message = "Logout successfully.";
+                response.StatusCode = 200;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                return response;
+            }
         }
     }
 }

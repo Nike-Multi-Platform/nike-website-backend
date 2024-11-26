@@ -12,6 +12,7 @@ namespace nike_website_backend.Interfaces
         Task<Response<string>> GenerateAndFetchIdToken(string uid);
         Task<Response<Object>> RegisterAsync(RegisterDto userinfo);
         Task<Response<string>> LoginWithEmailPassword(LoginDto loginInfo);
-        Task<Response<string>> LoginWithGoogle(string googleIdToken);
+        Task<Response<string>> LoginWithGoogle(string idToken);
+        Task<Response<string>> Logout(string UserId);
     }
 }
