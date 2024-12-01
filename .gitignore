@@ -38,3 +38,6 @@ appsettings.Local.json
 .vs/nike-website-backend/v17/DocumentLayout.json
 Configs/nike-d3392-firebase-adminsdk-t6ndk-364532f7b5.json
 obj/project.nuget.cache
+
+obj/Debug/net8.0
+bin/Debug/net8.0
