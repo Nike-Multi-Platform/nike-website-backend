@@ -339,7 +339,7 @@ namespace nike_website_backend.Services
             {
                 var actionCodeSettings = new ActionCodeSettings()
                 {
-                    Url = "http://localhost:3000",
+                    Url = "http://localhost:3000/login",
                     HandleCodeInApp = true,
                 };
 
@@ -642,6 +642,48 @@ namespace nike_website_backend.Services
                 response.Message = $"Unexpected error: {ex.Message}";
                 response.StatusCode = 500;
                 return response;
+            }
+        }
+
+        public Task<Response<string>> ForgotPassword(string email)
+        {
+            Response<string> response = new Response<string>();
+            if (string.IsNullOrEmpty(email))
+            {
+                response.Message = "Email is required.";
+                response.StatusCode = 400;
+                return Task.FromResult(response);
+            }
+
+            // check email exist in data base
+            var user = _context.UserAccounts.FirstOrDefault(x => x.UserEmail == email);
+            if (user == null)
+            {
+                response.Message = "Email not found.";
+                response.StatusCode = 404;
+                return Task.FromResult(response);
+            }
+            try
+            {
+                // Send password reset email
+                var actionCodeSettings = new ActionCodeSettings()
+                {
+                    Url = "http://localhost:3000/login",
+                    HandleCodeInApp = true,
+                };
+                var link = FirebaseAuth.DefaultInstance.GeneratePasswordResetLinkAsync(email, actionCodeSettings);
+                // Send email
+                var mailer = new MailerHelper();
+                var sendEmail = mailer.SendForgotPasswordEmailAsync(email, link.Result);
+                response.Message = "Please check email to reset password";
+                response.StatusCode = 200;
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                return Task.FromResult(response);
             }
         }
     }
