@@ -57,5 +57,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _userAccountRepository.Logout(UserId));
         }
+
+        [HttpPost("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto user_info)
+        {
+            return Ok(await _userAccountRepository.UpdateProfile(user_info));
+        }
     }
 }
