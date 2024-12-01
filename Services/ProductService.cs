@@ -263,7 +263,7 @@ namespace nike_website_backend.Services
 
             }).AsQueryable();
 
-            var productParents = await query.Skip(offset).Take(limit).ToListAsync();
+            var productParents = await query.Where(p=> p.quantityInStock != 0).Skip(offset).Take(limit).ToListAsync();
             var totalProducts = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalProducts / limit);
             response.StatusCode = 200;
@@ -306,7 +306,7 @@ namespace nike_website_backend.Services
                 quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
 
             }).AsQueryable();
-            var productParents = await query.Skip(offset).Take(limit).ToListAsync();
+            var productParents = await query.Where(p=>p.quantityInStock != 0).Skip(offset).Take(limit).ToListAsync();
             var totalProducts = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalProducts / limit);
             res.StatusCode = 200;
@@ -409,7 +409,7 @@ namespace nike_website_backend.Services
 
                 // Lọc sản phẩm có liên quan đến lịch sử tìm kiếm
                 prioritizedProducts = await query
-                    .Where(p => searchKeywords.Any(keyword => p.ProductParentName.Contains(keyword)))
+                    .Where(p => searchKeywords.Any(keyword => p.ProductParentName.Contains(keyword)) && p.quantityInStock != 0)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -422,7 +422,7 @@ namespace nike_website_backend.Services
             else
             {
 
-                otherProducts = await query.AsNoTracking().ToListAsync();
+                otherProducts = await query.Where( p=>p.quantityInStock != 0 ).AsNoTracking().ToListAsync();
             }
 
             var random = new Random();
