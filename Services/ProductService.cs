@@ -4,6 +4,7 @@ using nike_website_backend.Helpers;
 using nike_website_backend.Interfaces;
 using nike_website_backend.Models;
 using System.Net.WebSockets;
+using System.Text.RegularExpressions;
 
 namespace nike_website_backend.Services
 {
@@ -15,11 +16,15 @@ namespace nike_website_backend.Services
         {
             _context = context;
         }
-
+        private int ExtractSizeNumber(string sizeName)
+        {
+            var numberPart = Regex.Match(sizeName, @"\d+").Value;
+            return int.TryParse(numberPart, out var sizeNumber) ? sizeNumber : int.MaxValue;
+        }
         public async Task<Response<ProductDetailDto>> GetProductDetail(int productId)
         {
             Response<ProductDetailDto> response = new Response<ProductDetailDto>();
-            var ProductDetailDto = await _context.Products.Where(p => p.ProductId == productId).Select(p => new ProductDetailDto
+            var query = _context.Products.Where(p => p.ProductId == productId).Select(p => new ProductDetailDto
             {
                 ProductId = p.ProductId,
                 MoreInfo = p.ProductDescription,
@@ -44,12 +49,46 @@ namespace nike_website_backend.Services
                     }
                 }).ToList(),
 
-            }).FirstOrDefaultAsync();
-
-            response.StatusCode = 200;
-            response.Message = "Lấy dữ liệu thành công";
-            response.Data = ProductDetailDto;
-            return response;
+            }).AsNoTracking().AsQueryable();
+         
+            var ProductDetailDto = await query.FirstOrDefaultAsync();
+            if(ProductDetailDto == null)
+            {
+                response.StatusCode = 404;
+                response.Message = "Product Not Found !!!";
+                response.Data = null;
+                return response;
+            }
+            var sizeOrder = new Dictionary<string, int>
+            {
+                { "XS", 1 },
+                { "S", 2 },
+                { "M", 3 },
+                { "L", 4 },
+                { "XL", 5 },
+                { "XXL", 6 },
+                { "XXXL", 7 },
+            };
+            var isAllOverSize = ProductDetailDto.ProductSizeDtos.All(s => s.SizeDto.SizeName.Equals("Oversize", StringComparison.OrdinalIgnoreCase));
+            if (isAllOverSize)
+            {
+                response.StatusCode = 200;
+                response.Message = "Lấy dữ liệu thành công";
+                response.Data = ProductDetailDto;
+                return response;
+            }else
+            {
+                ProductDetailDto.ProductSizeDtos = ProductDetailDto.ProductSizeDtos.OrderBy(s =>
+            sizeOrder.ContainsKey(s.SizeDto.SizeName)
+                ? sizeOrder[s.SizeDto.SizeName]
+                : ExtractSizeNumber(s.SizeDto.SizeName)
+                ).ToList();
+                response.StatusCode = 200;
+                response.Message = "Lấy dữ liệu thành công";
+                response.Data = ProductDetailDto;
+                return response;
+            }
+      
         }
 
 
