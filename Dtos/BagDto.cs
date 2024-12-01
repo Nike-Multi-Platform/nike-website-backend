@@ -1,4 +1,6 @@
-﻿namespace nike_website_backend.Dtos
+﻿using nike_website_backend.Models;
+
+namespace nike_website_backend.Dtos
 {
     public class BagDto
     {
@@ -7,7 +9,7 @@
         public int product_size_id { get; set; }
         public int amount { get; set; }
         public Boolean is_selected { get; set; }
-        public ProductDetailDto productDetail { get; set; }
-        
+        public ProductDto details { get; set; }
+        public RegisterFlashSaleProduct RegisterFlashSaleProduct { get; set; }
     }
 }
