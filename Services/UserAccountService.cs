@@ -300,6 +300,16 @@ namespace nike_website_backend.Services
                     RoleId = 1,
                     UserUsername = userRecord.Email.Split('@')[0] + Guid.NewGuid().ToString().Substring(0, 5)
                 };
+                // create user wallet
+                var userWallet = new UserWallet
+                {
+                    UserId = userRecord.Uid,
+                    Balance = 0,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _context.UserWallets.Add(userWallet);
+                await _context.UserWallets.AddAsync(userWallet);
 
                 _context.UserAccounts.Add(newUser);
                 await _context.SaveChangesAsync();
@@ -536,6 +546,17 @@ namespace nike_website_backend.Services
                         UserLastName = decodedToken.Claims.TryGetValue("family_name", out var familyName) && familyName != null ? familyName.ToString() : "",
                         UserUsername = email.Split('@')[0] + Guid.NewGuid().ToString().Substring(0, 5)
                     };
+
+                    // create user wallet
+                    var userWallet = new UserWallet
+                    {
+                        UserId = decodedToken.Uid,
+                        Balance = 0,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    _context.UserWallets.Add(userWallet);
+                    await _context.UserWallets.AddAsync(userWallet);
 
                     _context.UserAccounts.Add(newUser);
                     await _context.SaveChangesAsync();
