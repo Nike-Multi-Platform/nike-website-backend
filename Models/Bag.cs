@@ -7,13 +7,15 @@ public partial class Bag
 {
     public int BagId { get; set; }
 
-    public string? UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
-    public int? ProductSizeId { get; set; }
+    public int ProductSizeId { get; set; }
 
-    public int? Amount { get; set; }
+    public int Amount { get; set; }
 
-    public virtual ProductSize? ProductSize { get; set; }
+    public bool IsSelected { get; set; }
 
-    public virtual UserAccount? User { get; set; }
+    public virtual ProductSize ProductSize { get; set; } = null!;
+
+    public virtual UserAccount User { get; set; } = null!;
 }

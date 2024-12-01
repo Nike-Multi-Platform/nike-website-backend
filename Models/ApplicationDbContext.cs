@@ -94,6 +94,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.BagId).HasColumnName("bag_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.IsSelected).HasColumnName("is_selected");
             entity.Property(e => e.ProductSizeId).HasColumnName("product_size_id");
             entity.Property(e => e.UserId)
                 .HasMaxLength(255)
@@ -102,10 +103,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.ProductSize).WithMany(p => p.Bags)
                 .HasForeignKey(d => d.ProductSizeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__bag__product_siz__5535A963");
 
             entity.HasOne(d => d.User).WithMany(p => p.Bags)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__bag__user_id__5629CD9C");
         });
 
@@ -455,7 +458,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProductSize>(entity =>
         {
-            entity.ToTable("product_size");
+            entity.ToTable("product_size", tb => tb.HasTrigger("trg_updated_total_stock"));
 
             entity.Property(e => e.ProductSizeId).HasColumnName("product_size_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
