@@ -40,14 +40,19 @@ namespace nike_website_backend.Controllers
             return Ok(await _bagRepository.updateSelected(bag_id, isSelected));
         }
         [HttpPost("update-size/{bag_id}")]
-        public async Task<IActionResult> updateSize(int bag_id, int product_size_id)
+        public async Task<IActionResult> updateSize(int bag_id,[FromQuery]String userId, [FromQuery] int product_size_id)
         {
-            return Ok(await _bagRepository.updateSize(bag_id, product_size_id));
+            return Ok(await _bagRepository.updateSize(bag_id,userId, product_size_id));
         }
         [HttpGet("get-sizes/{product_id}")]
         public async Task<IActionResult> getProductSizes(int product_id)
         {
             return Ok(await _bagRepository.getProductSizes(product_id));
+        }
+        [HttpGet("get-total-items/{userId}")]
+        public async Task<IActionResult> getTotalAmount(String userId)
+        {
+            return Ok(await _bagRepository.getTotalAmount(userId));
         }
     }
         

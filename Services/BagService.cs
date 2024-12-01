@@ -36,8 +36,14 @@ namespace nike_website_backend.Services
                 {
                     response.StatusCode = 400;
                     response.Message = $"Not enough stock. Only {productSize.Soluong} items available.";
-
-                }else
+                    response.Data = false;
+                    return response;
+                } else if (amount + bagItems.Amount > 10) {
+                    response.StatusCode = 400;
+                    response.Message = $"Products in the cart can only have a maximum of 10 quantities.";
+                    response.Data = false;
+                    return response;
+                } else
                 {
                     bagItems.Amount += amount;
                     _context.Bags.Update(bagItems);
@@ -285,21 +291,23 @@ namespace nike_website_backend.Services
                 { "XXL", 6 },
                 { "XXXL", 7 },
             };
-            var isAllOverSize = await query.AllAsync(s => s.SizeDto.SizeName.Equals("Oversize", StringComparison.OrdinalIgnoreCase));
+            var sizes = await query.ToListAsync();
+            var isAllOverSize = sizes.All(s => s.SizeDto.SizeName.Contains("oversize", StringComparison.OrdinalIgnoreCase));
+
             if (isAllOverSize)
             {
-                var sizes = await query.ToListAsync();
+               
                 response.StatusCode = 200;
                 response.Message = "Lấy dữ liệu thành công";
                 response.Data = sizes;
                 return response;
             }else
             {
-                var sizes = await query.OrderBy(s =>
-            sizeOrder.ContainsKey(s.SizeDto.SizeName)
-                ? sizeOrder[s.SizeDto.SizeName]
-                : ExtractSizeNumber(s.SizeDto.SizeName)
-                ).ToListAsync();
+                sizes = sizes.OrderBy(s =>
+                 sizeOrder.ContainsKey(s.SizeDto.SizeName)
+                     ? sizeOrder[s.SizeDto.SizeName]
+                     : ExtractSizeNumber(s.SizeDto.SizeName)
+             ).ToList();
                 response.StatusCode = 200;
                 response.Message = "Lấy dữ liệu thành công";
                 response.Data = sizes;
@@ -309,7 +317,7 @@ namespace nike_website_backend.Services
 
 
         }
-        public async Task<Response<Boolean>> updateSize(int bag_id, int product_size_id)
+        public async Task<Response<Boolean>> updateSize(int bag_id,String userId, int product_size_id)
         {
             Response<Boolean> res = new Response<Boolean>();
             var bagItem = await _context.Bags.Where(b=> b.BagId == bag_id).FirstOrDefaultAsync();
@@ -334,15 +342,41 @@ namespace nike_website_backend.Services
                 res.Data = false;
                 return res;
             }
-
-            if (bagItem.Amount > productSize.Soluong)
-            {
-                bagItem.ProductSizeId = product_size_id;
-                bagItem.Amount = (int)productSize.Soluong;
+            var existingItem = await _context.Bags
+             .Where(b => b.UserId == userId && b.ProductSizeId == product_size_id)
+             .FirstOrDefaultAsync();
+            if (existingItem == null) {
+                if (bagItem.Amount > productSize.Soluong)
+                {
+                    bagItem.ProductSizeId = product_size_id;
+                    bagItem.Amount = (int)productSize.Soluong;
+                }
+                else
+                {
+                    bagItem.ProductSizeId = product_size_id;
+                }
             }else
             {
-                bagItem.ProductSizeId = product_size_id;
+                int combinedAmount = bagItem.Amount + existingItem.Amount;
+
+                if (combinedAmount > productSize.Soluong)
+                {
+                    
+                    existingItem.Amount = (int)productSize.Soluong;
+                }
+                else if (combinedAmount <= 10)
+                {
+           
+                    existingItem.Amount += bagItem.Amount;
+                }
+                else
+                {
+           
+                    existingItem.Amount = 10;
+                }
+                _context.Bags.Remove(bagItem);
             }
+        
 
             try
             {
@@ -360,6 +394,21 @@ namespace nike_website_backend.Services
             res.StatusCode = 200;
             res.Message = "Item size updated successfully";
             res.Data = true;
+            return res;
+        }
+
+        public async Task<Response<int>> getTotalAmount(String userId)
+        {
+            Response<int> res = new Response<int>();
+
+            var totalAmount = await _context.Bags.AsNoTracking()
+                .Where(p => p.UserId == userId && p.ProductSize.Soluong > 0)
+                .CountAsync();
+
+
+            res.StatusCode = 200;
+            res.Message = "Data fetched successfully.";
+            res.Data = totalAmount;
             return res;
         }
     }

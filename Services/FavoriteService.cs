@@ -24,7 +24,7 @@ namespace nike_website_backend.Services
         {
             Response<Boolean> res = new Response<Boolean>();
             var item = await  _context.UserFavoriteProducts.Where(p => p.UserId == userId && p.ProductId == product_id).FirstOrDefaultAsync();
-            if (item == null)
+            if (item != null)
             {
                 res.StatusCode = 400;
                 res.Message = "The product is already in the wishlist.";
@@ -120,5 +120,6 @@ namespace nike_website_backend.Services
 
         }
         
+      
     }
 }

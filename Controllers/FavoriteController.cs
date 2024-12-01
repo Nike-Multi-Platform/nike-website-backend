@@ -14,8 +14,8 @@ namespace nike_website_backend.Controllers
             _favoriteRepository = favoriteRepository;
         }
       
-        [HttpPost("add-to-favorites")]
-        public async Task<IActionResult> addToFavorite([FromQuery] String userId, [FromQuery] int product_id)
+        [HttpPost("add-to-favorites/{userId}")]
+        public async Task<IActionResult> addToFavorite( String userId, [FromQuery] int product_id)
         {
             return Ok(await _favoriteRepository.addToFavorite(userId, product_id));
         }
