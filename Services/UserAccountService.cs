@@ -300,6 +300,16 @@ namespace nike_website_backend.Services
                     RoleId = 1,
                     UserUsername = userRecord.Email.Split('@')[0] + Guid.NewGuid().ToString().Substring(0, 5)
                 };
+                // create user wallet
+                var userWallet = new UserWallet
+                {
+                    UserId = userRecord.Uid,
+                    Balance = 0,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _context.UserWallets.Add(userWallet);
+                await _context.UserWallets.AddAsync(userWallet);
 
                 _context.UserAccounts.Add(newUser);
                 await _context.SaveChangesAsync();
@@ -329,7 +339,7 @@ namespace nike_website_backend.Services
             {
                 var actionCodeSettings = new ActionCodeSettings()
                 {
-                    Url = "http://localhost:3000",
+                    Url = "http://localhost:3000/login",
                     HandleCodeInApp = true,
                 };
 
@@ -537,6 +547,17 @@ namespace nike_website_backend.Services
                         UserUsername = email.Split('@')[0] + Guid.NewGuid().ToString().Substring(0, 5)
                     };
 
+                    // create user wallet
+                    var userWallet = new UserWallet
+                    {
+                        UserId = decodedToken.Uid,
+                        Balance = 0,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    _context.UserWallets.Add(userWallet);
+                    await _context.UserWallets.AddAsync(userWallet);
+
                     _context.UserAccounts.Add(newUser);
                     await _context.SaveChangesAsync();
 
@@ -621,6 +642,48 @@ namespace nike_website_backend.Services
                 response.Message = $"Unexpected error: {ex.Message}";
                 response.StatusCode = 500;
                 return response;
+            }
+        }
+
+        public Task<Response<string>> ForgotPassword(string email)
+        {
+            Response<string> response = new Response<string>();
+            if (string.IsNullOrEmpty(email))
+            {
+                response.Message = "Email is required.";
+                response.StatusCode = 400;
+                return Task.FromResult(response);
+            }
+
+            // check email exist in data base
+            var user = _context.UserAccounts.FirstOrDefault(x => x.UserEmail == email);
+            if (user == null)
+            {
+                response.Message = "Email not found.";
+                response.StatusCode = 404;
+                return Task.FromResult(response);
+            }
+            try
+            {
+                // Send password reset email
+                var actionCodeSettings = new ActionCodeSettings()
+                {
+                    Url = "http://localhost:3000/login",
+                    HandleCodeInApp = true,
+                };
+                var link = FirebaseAuth.DefaultInstance.GeneratePasswordResetLinkAsync(email, actionCodeSettings);
+                // Send email
+                var mailer = new MailerHelper();
+                var sendEmail = mailer.SendForgotPasswordEmailAsync(email, link.Result);
+                response.Message = "Please check email to reset password";
+                response.StatusCode = 200;
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                return Task.FromResult(response);
             }
         }
     }

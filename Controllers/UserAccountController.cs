@@ -63,5 +63,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _userAccountRepository.UpdateProfile(user_info));
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassWord([FromBody] string email)
+        {
+            return Ok(await _userAccountRepository.ForgotPassword(email));
+        }
     }
 }
