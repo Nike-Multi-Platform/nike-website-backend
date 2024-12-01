@@ -34,7 +34,7 @@ namespace nike_website_backend.Services
             if (string.IsNullOrEmpty(idToken))
             {
                 response.Message = "ID token is required.";
-                response.StatusCode = 400; 
+                response.StatusCode = 400;
                 return response;
             }
 
@@ -68,17 +68,17 @@ namespace nike_website_backend.Services
                 };
                 response.Data = data;
                 response.Message = "Token verified successfully.";
-                response.StatusCode = 200; 
+                response.StatusCode = 200;
                 return response;
             }
             catch (FirebaseAuthException ex)
             {
                 response.StatusCode = ex.AuthErrorCode switch
                 {
-                    AuthErrorCode.ExpiredIdToken => 401, 
+                    AuthErrorCode.ExpiredIdToken => 401,
                     AuthErrorCode.InvalidIdToken => 401,
-                    AuthErrorCode.RevokedIdToken => 403, 
-                    _ => 500 
+                    AuthErrorCode.RevokedIdToken => 403,
+                    _ => 500
                 };
 
                 response.Message = ex.AuthErrorCode switch
@@ -94,7 +94,7 @@ namespace nike_website_backend.Services
             catch (Exception ex)
             {
                 response.Message = $"Unexpected error: {ex.Message}";
-                response.StatusCode = 500; 
+                response.StatusCode = 500;
                 return response;
             }
         }
@@ -356,7 +356,7 @@ namespace nike_website_backend.Services
                 return await Task.FromResult(response);
             }
 
-            if(loginInfo.Email.Contains("@"))
+            if (loginInfo.Email.Contains("@"))
             {
                 user_email = loginInfo.Email;
                 var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserEmail == loginInfo.Email);
@@ -527,7 +527,7 @@ namespace nike_website_backend.Services
                     {
                         UserId = decodedToken.Uid,
                         UserEmail = email,
-                        UserGender = "Khác",
+                        UserGender = "Male",
                         UserPhoneNumber = "",
                         UserAddress = "",
                         UserUrl = "",
@@ -575,6 +575,44 @@ namespace nike_website_backend.Services
             {
                 await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(UserId);
                 response.Message = "Logout successfully.";
+                response.StatusCode = 200;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                return response;
+            }
+        }
+
+        public async Task<Response<string>> UpdateProfile(UpdateProfileDto updateProfileDto)
+        {
+            Response<string> response = new Response<string>();
+            if (string.IsNullOrEmpty(updateProfileDto.UserId))
+            {
+                response.Message = "UserId is required.";
+                response.StatusCode = 400;
+                return response;
+            }
+            try
+            {
+                var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserId == updateProfileDto.UserId);
+                if (user == null)
+                {
+                    response.Message = "User not found.";
+                    response.StatusCode = 404;
+                    return response;
+                }
+                user.UserGender = updateProfileDto.UserGender;
+                user.UserPhoneNumber = updateProfileDto.UserPhoneNumber;
+                user.UserFirstName = updateProfileDto.UserFirstName;
+                user.UserLastName = updateProfileDto.UserLastName;
+                user.UserAddress = updateProfileDto.UserAddress;
+                user.UserUrl = updateProfileDto.ImageUrl;
+                user.UserUsername = updateProfileDto.UserName;
+                await _context.SaveChangesAsync();
+                response.Message = "Update profile successfully.";
                 response.StatusCode = 200;
                 return response;
             }
