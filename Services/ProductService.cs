@@ -132,43 +132,64 @@ namespace nike_website_backend.Services
 
         public async Task<Response<List<ProductParentDto>>> GetProductParents(int subCategoryId, QueryObject queryObject)
         {
+            var offset = (queryObject.Page - 1) * queryObject.PageSize;
             Response<List<ProductParentDto>> response = new Response<List<ProductParentDto>>();
-            var query = _context.ProductParents.Where(p => p.SubCategoriesId == subCategoryId).Select(p => new ProductParentDto
+            var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+            var currentDate = DateTime.Now;
+            FlashSaleTimeFrame flashSaleTimeFrame = null;
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+
+            if (flashSale != null)
+            {
+                flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+
+            }
+            var query = _context.ProductParents.Where(p => p.CreatedAt >= thirtyDaysAgo && p.CreatedAt <= currentDate).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
             {
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
-                ProductIcon = new ProductIconDto
-                {
-                    ProductIconId = p.ProductIcons.ProductIconsId,
-                    ProductIconName = p.ProductIcons.IconName,
-                    Thumbnail = p.ProductIcons.Thumbnail
-                },
-                Products = p.Products.Select(p => new ProductDto
-                {
-                    ProductId = p.ProductId,
-                    ProductImage = p.ProductImg,
-
-                    // ... more properties
-                }).ToList(),
+                ProductIconsId = p.ProductIconsId,
                 Thumbnail = p.Thumbnail,
                 ProductPrice = p.ProductPrice,
-                IsNew = p.IsNewRelease
+                IsNew = p.IsNewRelease,
+                SubCategoriesId = p.SubCategoriesId,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+                categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
+                salePrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì gán 0
+                RegisterFlashSaleProduct = flashSaleTimeFrame != null
+            ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
+            : null,
+                quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
+
+
             }).AsQueryable();
 
-            // Tìm theo tên sản phẩm
-            if (!string.IsNullOrEmpty(queryObject.ProductName))
-            {
-                query = query.Where(p => p.ProductParentName.Contains(queryObject.ProductName));
-            }
-            // Sắp xếp
-            if (queryObject.SortBy == "price")
-            {
-                query = queryObject.IsSortAscending ? query.OrderBy(p => p.ProductPrice) : query.OrderByDescending(p => p.ProductPrice);
-            }
-            // Phân trang
-            var skip = (queryObject.Page - 1) * queryObject.PageSize;
-            var take = queryObject.PageSize;
-            query = query.Skip(skip).Take(take);
+            // Xử lý ...
+            // Theo min max price
+            // Theo giá salePrice
+            // Theo giới tính
+            // theo createAt
+            // Sắp xếp(giá giảm, tăng)
+            
+            // // Tìm theo tên sản phẩm
+            // if (!string.IsNullOrEmpty(queryObject.ProductName))
+            // {
+            //     query = query.Where(p => p.ProductParentName.Contains(queryObject.ProductName));
+            // }
+            // // Sắp xếp
+            // if (queryObject.SortBy == "price")
+            // {
+            //     query = queryObject.IsSortAscending ? query.OrderBy(p => p.ProductPrice) : query.OrderByDescending(p => p.ProductPrice);
+            // }
+            // else if (queryObject.SortBy == "createAt")
+            // {
+            //     // query = queryObject.IsSortAscending ? query.OrderBy(p => p.) : query.OrderByDescending(p => p.CreatedAt);
+            // }
+            // // Phân trang
+            // var skip = (queryObject.Page - 1) * queryObject.PageSize;
+            // var take = queryObject.PageSize;
+            // query = query.Skip(skip).Take(take);
 
             var productParentDtos = await query.ToListAsync();
 
@@ -350,7 +371,7 @@ namespace nike_website_backend.Services
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
                 categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
-                salePrice =  p.Products.Any(pr => pr.SalePrices > 0)
+                salePrice = p.Products.Any(pr => pr.SalePrices > 0)
     ? p.Products.Where(pr => pr.SalePrices > 0).Min(pr => pr.SalePrices)
     : 0,
 
@@ -381,17 +402,17 @@ namespace nike_website_backend.Services
             }
             else
             {
-           
+
                 otherProducts = await query.AsNoTracking().ToListAsync();
             }
 
             var random = new Random();
 
-        
+
             prioritizedProducts = prioritizedProducts.OrderBy(_ => random.Next()).ToList();
             otherProducts = otherProducts.OrderBy(_ => random.Next()).ToList();
 
-        
+
             var finalResult = prioritizedProducts.Concat(otherProducts).Take(limit).ToList();
 
             res.StatusCode = 200;
@@ -404,4 +425,4 @@ namespace nike_website_backend.Services
     }
 
 
-    }
+}
