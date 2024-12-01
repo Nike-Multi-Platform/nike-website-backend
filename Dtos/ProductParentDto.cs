@@ -15,11 +15,12 @@ namespace nike_website_backend.Dtos
         public DateTime UpdatedAt { get; set; }
 
         public string Thumbnail { get; set; }
-        public decimal? ProductPrice { get; set; }
         public bool? IsNew { get; set; }
 
         public int? ProductIconsId { get; set; }
-        public decimal? salePrice { get; set; }
+        public decimal? salePrice { get; set; } // Giá khuyến mãi
+        public decimal? ProductPrice { get; set; } // Giá gốc
+        public decimal? finalPrice { get; set; } // Giá cuối cùng (là giá khuyến mãi nếu có, không thì là giá gốc)
         public string? categoryWithObjectName { get; set; }
         public ProductIconDto ProductIcon { get; set; }
         public List<ProductDto> Products { get; set; }

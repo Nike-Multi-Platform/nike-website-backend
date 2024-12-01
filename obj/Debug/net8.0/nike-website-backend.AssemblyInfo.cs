@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("nike-website-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b83faf144fed33fb048d55ceb2c6764e56e2ec20")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af967ef079e67a158c6ad4a81a47f1b34545b9f6")]
 [assembly: System.Reflection.AssemblyProductAttribute("nike-website-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("nike-website-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

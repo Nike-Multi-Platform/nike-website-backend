@@ -157,6 +157,7 @@ namespace nike_website_backend.Services
                 UpdatedAt = p.UpdatedAt,
                 categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
                 salePrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì gán 0
+                finalPrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : p.ProductPrice, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì hiển thị giá gốc
                 RegisterFlashSaleProduct = flashSaleTimeFrame != null
             ? p.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
             : null,
@@ -166,30 +167,48 @@ namespace nike_website_backend.Services
             }).AsQueryable();
 
             // Xử lý ...
-            // Theo min max price
+
+            // Tìm theo tên sản phẩm
+            if (!string.IsNullOrEmpty(queryObject.ProductName))
+            {
+                query = query.Where(p => p.ProductParentName.Contains(queryObject.ProductName));
+            }
+
+            // Theo min max price(xong)
+            if (queryObject.MaxPrice > queryObject.MinPrice)
+            {
+                query = query.Where(p => p.ProductPrice >= queryObject.MinPrice && p.ProductPrice <= queryObject.MaxPrice);
+            }
+
             // Theo giá salePrice
-            // Theo giới tính
-            // theo createAt
-            // Sắp xếp(giá giảm, tăng)
-            
-            // // Tìm theo tên sản phẩm
-            // if (!string.IsNullOrEmpty(queryObject.ProductName))
-            // {
-            //     query = query.Where(p => p.ProductParentName.Contains(queryObject.ProductName));
-            // }
-            // // Sắp xếp
-            // if (queryObject.SortBy == "price")
-            // {
-            //     query = queryObject.IsSortAscending ? query.OrderBy(p => p.ProductPrice) : query.OrderByDescending(p => p.ProductPrice);
-            // }
-            // else if (queryObject.SortBy == "createAt")
-            // {
-            //     // query = queryObject.IsSortAscending ? query.OrderBy(p => p.) : query.OrderByDescending(p => p.CreatedAt);
-            // }
-            // // Phân trang
-            // var skip = (queryObject.Page - 1) * queryObject.PageSize;
-            // var take = queryObject.PageSize;
-            // query = query.Skip(skip).Take(take);
+
+            // Sort ...
+            // Theo giới tính(xong)
+            int[] objectIds = { 1, 2, 3 }; // 1 nam, 2 nữ, 3 kid
+            if (objectIds.Contains(queryObject.productObjectId))
+            {
+                query = query.Where(p => p.SubCategories.Categories.ProductObject.ProductObjectId == queryObject.productObjectId);
+            }
+            // Sắp xếp theo tên (xong)
+            if (queryObject.SortBy == "productName")
+            {
+                query = queryObject.IsSortAscending ? query.OrderBy(p => p.ProductParentName) : query.OrderByDescending(p => p.ProductPrice);
+            }
+            // Sắp xếp theo createAt (xong)
+            if (queryObject.SortBy == "createAt")
+            {
+                query = queryObject.IsSortAscending ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.ProductPrice);
+            }
+            // Sắp xếp theo giá (xong)
+            if (queryObject.SortBy == "price")
+            {
+                query = queryObject.IsSortAscending ? query.OrderBy(p => p.finalPrice) : query.OrderByDescending(p => p.ProductPrice);
+            }
+
+            // Phân trang(xong)
+            var skip = (queryObject.Page - 1) * queryObject.PageSize;
+            var take = queryObject.PageSize;
+            query = query.Skip(skip).Take(take);
 
             var productParentDtos = await query.ToListAsync();
 
