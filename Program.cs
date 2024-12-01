@@ -27,6 +27,7 @@ builder.Services.AddScoped<IProductRepository, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryService>();
 builder.Services.AddScoped<IUserAccountRepository, UserAccountService>();
 builder.Services.AddScoped<IFlashSaleRepository,FlashSaleService>();
+builder.Services.AddScoped<IBagRepository, BagService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp", policyBuilder =>

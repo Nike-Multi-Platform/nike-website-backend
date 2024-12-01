@@ -9,7 +9,11 @@ public partial class UserDiscountVoucher
 
     public string UserId { get; set; } = null!;
 
-    public int? Quantity { get; set; }
+    public int TotalUsed { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public virtual DiscountVoucher DiscountVoucher { get; set; } = null!;
 
