@@ -155,6 +155,7 @@ namespace nike_website_backend.Services
                 SubCategoriesId = p.SubCategoriesId,
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
+                ProductObjectId = p.SubCategories.Categories.ProductObject.ProductObjectId,
                 categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
                 salePrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì gán 0
                 finalPrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : p.ProductPrice, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì hiển thị giá gốc
@@ -167,6 +168,8 @@ namespace nike_website_backend.Services
             }).AsQueryable();
 
             // Xử lý ...
+            // Lọc theo subCategoryId(xong)
+            query = query.Where(p => p.SubCategoriesId == subCategoryId);
 
             // Tìm theo tên sản phẩm
             if (!string.IsNullOrEmpty(queryObject.ProductName))
@@ -187,7 +190,7 @@ namespace nike_website_backend.Services
             int[] objectIds = { 1, 2, 3 }; // 1 nam, 2 nữ, 3 kid
             if (objectIds.Contains(queryObject.productObjectId))
             {
-                query = query.Where(p => p.SubCategories.Categories.ProductObject.ProductObjectId == queryObject.productObjectId);
+                query = query.Where(p => p.ProductObjectId == queryObject.productObjectId);
             }
             // Sắp xếp theo tên (xong)
             if (queryObject.SortBy == "productName")
