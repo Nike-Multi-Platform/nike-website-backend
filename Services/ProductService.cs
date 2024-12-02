@@ -172,7 +172,7 @@ namespace nike_website_backend.Services
             query = query.Where(p => p.SubCategoriesId == subCategoryId);
 
             // Tìm theo tên sản phẩm
-            if (!string.IsNullOrEmpty(queryObject.ProductName))
+            if (!queryObject.ProductName.Contains("-1"))
             {
                 query = query.Where(p => p.ProductParentName.Contains(queryObject.ProductName));
             }

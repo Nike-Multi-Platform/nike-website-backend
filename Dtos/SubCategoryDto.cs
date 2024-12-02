@@ -4,5 +4,6 @@ namespace nike_website_backend.Dtos
     {
         public int SubCategoryId { get; set; }
         public string SubCategoryName { get; set; }
+        public int? CategoryId { get; set; } // Mã danh mục cha để truy vấn các danh mục con liên quan
     }
 }
