@@ -40,7 +40,7 @@ namespace nike_website_backend.Services
                     return response;
                 } else if (amount + bagItems.Amount > 10) {
                     response.StatusCode = 400;
-                    response.Message = $"Products in the cart can only have a maximum of 10 quantities.";
+                    response.Message = $"Products in the bag can only have a maximum of 10 quantities.";
                     response.Data = false;
                     return response;
                 } else
@@ -73,7 +73,7 @@ namespace nike_website_backend.Services
                 return response;
             }
             response.StatusCode = 200;
-            response.Message = "Product added to cart successfully";
+            response.Message = "Product added to bag successfully";
             response.Data = true;
             return response;
 
@@ -93,28 +93,56 @@ namespace nike_website_backend.Services
 
             }
             //p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName
-            var query = _context.Bags.Where(b => b.UserId == userId).Select(b=> new BagDto
+
+            var query = _context.Bags.Where(b => b.UserId == userId).Select(b=> 
+            new BagDto
             {
                 bagId = b.BagId,
                 userId = b.UserId,
                 product_size_id = b.ProductSizeId,
+                ProductSizeName = b.ProductSize.Size.SizeName,
                 amount = b.Amount,
                 is_selected = b.IsSelected,
                 details = new ProductDto
                 {
                    ProductId = b.ProductSize.ProductId,
+                   ProductName = b.ProductSize.Product.ProductParent.ProductParentName,
+                  
                    ProductParentId = b.ProductSize.Product.ProductParentId,
                    ProductImage = b.ProductSize.Product.ProductImg,
                    categoryWithObjectName = b.ProductSize.Product.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + b.ProductSize.Product.ProductParent.SubCategories.Categories.CategoriesName,
-                   stock = b.ProductSize.Soluong,
+                   stock = flashSaleTimeFrame != null &&
+                         b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0) ? (int)(b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).Quantity - b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).Sold) :  b.ProductSize.Soluong,
                    price = b.ProductSize.Product.ProductParent.ProductPrice,
                    salePrice = b.ProductSize.Product.SalePrices,
-                   finalPrice = flashSaleTimeFrame != null
+                   finalPrice = flashSaleTimeFrame != null &&
+                         b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0)
             ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : b.ProductSize.Product.SalePrices > 0 ? b.ProductSize.Product.SalePrices : b.ProductSize.Product.ProductParent.ProductPrice,
                 },
-                RegisterFlashSaleProduct = flashSaleTimeFrame != null
+                RegisterFlashSaleProduct = new RegisterFlashSaleProductDTO
+                {
+                    RegisterFlashSaleProduct = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0)
             ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
-            : null,
+            : null, started_at = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0)
+            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSaleTimeFrame.StartedAt : null,
+                    ended_at = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0)
+            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSaleTimeFrame.EndedAt : null,
+                    status = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0)
+            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSaleTimeFrame.Status : null
+                },
+                
 
             }).AsNoTracking().AsQueryable();
 
@@ -153,14 +181,14 @@ namespace nike_website_backend.Services
             }
 
             res.StatusCode = 200;
-            res.Message = "Product removed from cart successfully";
+            res.Message = "Product removed from bag successfully";
             res.Data = true;
             return res;
 
             
 
         }
-        public async Task<Response<Boolean>> updateItemQuantity (int bag_id, string type)
+        public async Task<Response<Boolean>> updateItemQuantity (int bag_id, int quantity)
         {
             Response<Boolean> res = new Response<Boolean>();
             var bagItem = await _context.Bags
@@ -185,29 +213,24 @@ namespace nike_website_backend.Services
                 res.Data = false;
                 return res;
             }
-         
-            if ( type == "increase")
+            if (quantity > bagItem.details.stock)
             {
-                
-                if (bagItem.amount + 1 > bagItem.details.stock)
-                {
-                    res.StatusCode = 400;
-                    res.Message = "Not enough stock to increase quantity.";
-                    res.Data = false;
-                    return res;
-                }    
-                bagItem.amount += 1;
-            }else
-            {
-                if (bagItem.amount == 1)
-                {
-                    res.StatusCode = 200;
-                    res.Message = "Quantity is already at minimum. No decrease applied.";
-                    res.Data = true;
-                    return res;
-                }
-                bagItem.amount -= 1;
+                res.StatusCode = 400;
+                res.Message = "Not enough stock to increase quantity.";
+                res.Data = false;
+                return res;
             }
+        
+
+            if (quantity < 1)
+            {
+                res.StatusCode = 200;
+                res.Message = "Quantity is already at minimum. No decrease applied.";
+                res.Data = true;
+                return res;
+            }
+            bagItem.amount = quantity;
+
 
             var bagToUpdate = await _context.Bags.FirstOrDefaultAsync(b => b.BagId == bag_id);
             if (bagToUpdate != null)

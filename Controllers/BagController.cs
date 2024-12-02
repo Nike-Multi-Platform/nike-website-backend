@@ -30,9 +30,9 @@ namespace nike_website_backend.Controllers
             return Ok(await _bagRepository.removeBagItem(bagId));
         }
         [HttpPost("update-quantity/{bag_id}")]
-        public async Task<IActionResult> updateItemQuantity(int bag_id,[FromQuery] string type)
+        public async Task<IActionResult> updateItemQuantity(int bag_id,[FromQuery] int quantity)
         {
-            return Ok(await _bagRepository.updateItemQuantity(bag_id, type));
+            return Ok(await _bagRepository.updateItemQuantity(bag_id, quantity));
         }
         [HttpPost("update-select/{bag_id}")]
         public async Task<IActionResult> updateSelected(int bag_id,[FromQuery] Boolean isSelected)

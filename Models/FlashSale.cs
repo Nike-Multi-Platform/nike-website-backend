@@ -7,6 +7,8 @@ public partial class FlashSale
 {
     public int FlashSaleId { get; set; }
 
+    public string? FlashSaleName { get; set; }
+
     public string? Thumbnail { get; set; }
 
     public string Status { get; set; } = null!;

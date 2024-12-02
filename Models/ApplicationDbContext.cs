@@ -181,6 +181,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.EndedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("ended_at");
+            entity.Property(e => e.FlashSaleName)
+                .HasMaxLength(255)
+                .HasDefaultValue("Event No Name")
+                .HasColumnName("flash_sale_name");
             entity.Property(e => e.StartedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("started_at");
