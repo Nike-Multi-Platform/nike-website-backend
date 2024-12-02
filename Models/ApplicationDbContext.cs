@@ -137,7 +137,31 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("discount_voucher");
 
             entity.Property(e => e.DiscountVoucherId).HasColumnName("discount_voucher_id");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.DiscountMaxValue).HasColumnName("discount_max_value");
+            entity.Property(e => e.DiscountType)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("discount_type");
+            entity.Property(e => e.DiscountValue).HasColumnName("discount_value");
+            entity.Property(e => e.EndedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("ended_at");
+            entity.Property(e => e.MinOrderValue).HasColumnName("min_order_value");
+            entity.Property(e => e.Quantity)
+                .HasMaxLength(10)
+                .IsFixedLength()
+                .HasColumnName("quantity");
+            entity.Property(e => e.StartedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("started_at");
+            entity.Property(e => e.Usage).HasColumnName("usage");
+            entity.Property(e => e.VoucherCode)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("voucher_code");
             entity.Property(e => e.VoucherName)
                 .HasMaxLength(255)
                 .HasColumnName("voucher_name");
@@ -706,7 +730,13 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("user_id");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.TotalUsed).HasColumnName("total_used");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
 
             entity.HasOne(d => d.DiscountVoucher).WithMany(p => p.UserDiscountVouchers)
                 .HasForeignKey(d => d.DiscountVoucherId)
