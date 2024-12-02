@@ -2,6 +2,8 @@ namespace nike_website_backend.Helpers
 {
     public class QueryObject
     {
+        // Thể loại
+        public int SubCategoryId { get; set; } = 0; // 0 tất cả
         // Tìm kiếm
         public string ProductName { get; set; } = "";
         // Giới tính

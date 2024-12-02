@@ -21,10 +21,10 @@ namespace nike_website_backend.Controllers
             return Ok(await _productRepository.GetProductObjects());
         }
 
-        [HttpGet("product-parents/{subCategoryId}")]
-        public async Task<IActionResult> GetProductParents(int subCategoryId, [FromQuery] QueryObject queryObject)
+        [HttpGet("product-parents")]
+        public async Task<IActionResult> GetProductParents([FromQuery] QueryObject queryObject)
         {
-            return Ok(await _productRepository.GetProductParents(subCategoryId, queryObject));
+            return Ok(await _productRepository.GetProductParents(queryObject));
         }
 
         [HttpGet("product-parent-detail/{productParentId}")]
