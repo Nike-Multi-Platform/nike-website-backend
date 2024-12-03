@@ -50,9 +50,9 @@ namespace nike_website_backend.Services
                 }).ToList(),
 
             }).AsNoTracking().AsQueryable();
-         
+
             var ProductDetailDto = await query.FirstOrDefaultAsync();
-            if(ProductDetailDto == null)
+            if (ProductDetailDto == null)
             {
                 response.StatusCode = 404;
                 response.Message = "Product Not Found !!!";
@@ -76,7 +76,8 @@ namespace nike_website_backend.Services
                 response.Message = "Lấy dữ liệu thành công";
                 response.Data = ProductDetailDto;
                 return response;
-            }else
+            }
+            else
             {
                 ProductDetailDto.ProductSizeDtos = ProductDetailDto.ProductSizeDtos.OrderBy(s =>
             sizeOrder.ContainsKey(s.SizeDto.SizeName)
@@ -88,7 +89,7 @@ namespace nike_website_backend.Services
                 response.Data = ProductDetailDto;
                 return response;
             }
-      
+
         }
 
 
@@ -169,7 +170,7 @@ namespace nike_website_backend.Services
             return response;
         }
 
-        public async Task<Response<List<ProductParentDto>>> GetProductParents(int subCategoryId, QueryObject queryObject)
+        public async Task<Response<List<ProductParentDto>>> GetProductParents(QueryObject queryObject)
         {
             var offset = (queryObject.Page - 1) * queryObject.PageSize;
             Response<List<ProductParentDto>> response = new Response<List<ProductParentDto>>();
@@ -194,6 +195,7 @@ namespace nike_website_backend.Services
                 SubCategoriesId = p.SubCategoriesId,
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
+                ProductObjectId = p.SubCategories.Categories.ProductObject.ProductObjectId,
                 categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
                 salePrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì gán 0
                 finalPrice = p.Products.Any() ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : p.ProductPrice, // Tìm trong các product color có giá sale thì hiển thị, còn lại thì hiển thị giá gốc
@@ -206,9 +208,14 @@ namespace nike_website_backend.Services
             }).AsQueryable();
 
             // Xử lý ...
+            // Lọc theo subCategoryId(xong)
+            if (queryObject.SubCategoryId > 0)
+            {
+                query = query.Where(p => p.SubCategoriesId == queryObject.SubCategoryId);
+            }
 
             // Tìm theo tên sản phẩm
-            if (!string.IsNullOrEmpty(queryObject.ProductName))
+            if (!queryObject.ProductName.Contains("-1"))
             {
                 query = query.Where(p => p.ProductParentName.Contains(queryObject.ProductName));
             }
@@ -226,7 +233,7 @@ namespace nike_website_backend.Services
             int[] objectIds = { 1, 2, 3 }; // 1 nam, 2 nữ, 3 kid
             if (objectIds.Contains(queryObject.productObjectId))
             {
-                query = query.Where(p => p.SubCategories.Categories.ProductObject.ProductObjectId == queryObject.productObjectId);
+                query = query.Where(p => p.ProductObjectId == queryObject.productObjectId);
             }
             // Sắp xếp theo tên (xong)
             if (queryObject.SortBy == "productName")
@@ -244,16 +251,23 @@ namespace nike_website_backend.Services
                 query = queryObject.IsSortAscending ? query.OrderBy(p => p.finalPrice) : query.OrderByDescending(p => p.ProductPrice);
             }
 
+
+            // Tính tổng số trang
+            var totalProducts = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalProducts / queryObject.PageSize);
+
             // Phân trang(xong)
             var skip = (queryObject.Page - 1) * queryObject.PageSize;
             var take = queryObject.PageSize;
             query = query.Skip(skip).Take(take);
+
 
             var productParentDtos = await query.ToListAsync();
 
             response.StatusCode = 200;
             response.Message = "Lấy dữ liệu thành công";
             response.Data = productParentDtos;
+            response.TotalPages = totalPages;
             return response;
         }
         public async Task<Response<List<ProductIcon>>> GetIcons(int page, int limit)
@@ -302,7 +316,7 @@ namespace nike_website_backend.Services
 
             }).AsQueryable();
 
-            var productParents = await query.Where(p=> p.quantityInStock != 0).Skip(offset).Take(limit).ToListAsync();
+            var productParents = await query.Where(p => p.quantityInStock != 0).Skip(offset).Take(limit).ToListAsync();
             var totalProducts = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalProducts / limit);
             response.StatusCode = 200;
@@ -345,7 +359,7 @@ namespace nike_website_backend.Services
                 quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
 
             }).AsQueryable();
-            var productParents = await query.Where(p=>p.quantityInStock != 0).Skip(offset).Take(limit).ToListAsync();
+            var productParents = await query.Where(p => p.quantityInStock != 0).Skip(offset).Take(limit).ToListAsync();
             var totalProducts = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalProducts / limit);
             res.StatusCode = 200;
@@ -461,7 +475,7 @@ namespace nike_website_backend.Services
             else
             {
 
-                otherProducts = await query.Where( p=>p.quantityInStock != 0 ).AsNoTracking().ToListAsync();
+                otherProducts = await query.Where(p => p.quantityInStock != 0).AsNoTracking().ToListAsync();
             }
 
             var random = new Random();

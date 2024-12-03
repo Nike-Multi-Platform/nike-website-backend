@@ -12,5 +12,12 @@ namespace nike_website_backend.Controllers
         {
             _categoryRepository = categoryRepository;
         }
+
+        [HttpGet("{categoryId}")]
+        // Bấm vào subcategory trên menu sẽ lấy category và từ category lấy ra subcategory
+        public async Task<IActionResult> getSubCategoriesByCategoryId([FromRoute] int categoryId)
+        {
+            return Ok(await _categoryRepository.getSubCategoriesByCategoryId(categoryId));
+        }
     }
 }

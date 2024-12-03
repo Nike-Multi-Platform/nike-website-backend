@@ -6,7 +6,7 @@ namespace nike_website_backend.Interfaces
     public interface IProductRepository
     {
         Task<Response<List<ProductObjectDto>>> GetProductObjects();
-        Task<Response<List<ProductParentDto>>> GetProductParents(int subCategoryId, QueryObject queryObject);
+        Task<Response<List<ProductParentDto>>> GetProductParents(QueryObject queryObject);
         Task<Response<ProductParentDto>> GetProductParentDetail(int productParentId);
         Task<Response<ProductDetailDto>> GetProductDetail(int productId);
         Task<Response<List<ProductIcon>>> GetIcons(int page,int limit);

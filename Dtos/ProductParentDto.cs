@@ -20,6 +20,7 @@ namespace nike_website_backend.Dtos
         public int? ProductIconsId { get; set; }
         public decimal? salePrice { get; set; } // Giá khuyến mãi
         public decimal? ProductPrice { get; set; } // Giá gốc
+        public int ProductObjectId { get; set; }
         public decimal? finalPrice { get; set; } // Giá cuối cùng (là giá khuyến mãi nếu có, không thì là giá gốc)
         public string? categoryWithObjectName { get; set; }
         public ProductIconDto ProductIcon { get; set; }
