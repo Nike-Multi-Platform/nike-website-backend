@@ -277,29 +277,40 @@ namespace nike_website_backend.Services
 
 
 
-        public async Task<Response<List<UserOrderDTO>>> GetUserOrder(string userId, int userOrderStatusId, string text,int limit,int page)
+        public async Task<Response<List<UserOrderDTO>>> GetUserOrder(string userId, int userOrderStatusId, string? text,int limit,int page)
         {
             
             
             try
             {
-                if (!string.IsNullOrEmpty(text) && !text.All(char.IsDigit))
-                {
-                    return new Response<List<UserOrderDTO>>
-                    {
-                        StatusCode = 500,
-                        Data = null,
-                        Message = "The search string must be full digit."
-                    };
-                }
+             
                 var offset = (page  - 1) * limit;
-                var userOrderId = int.Parse(text);
 
                 // Tạo query cơ bản để lọc đơn hàng theo userId và userOrderStatusId
-                var userOrders = await _context.UserOrders
-    .Where(v => v.UserId == userId && v.UserOrderStatusId == userOrderStatusId && v.UserOrderId == userOrderId)
-    .OrderByDescending(v => v.CreatedAt)
-    .ToListAsync();
+                var query = _context.UserOrders
+                .Where(v => v.UserId == userId)
+                .OrderByDescending(v => v.CreatedAt).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    if (text.All(char.IsDigit)) // Tìm theo UserOrderId nếu text là số
+                    {
+                        var userOrderId = int.Parse(text);
+                        query = query.Where(v => v.UserOrderId == userOrderId);
+                    }
+                    else // Tìm theo tên sản phẩm nếu text không phải là số
+                    {
+                        query = query.Where(v => v.UserOrderProducts
+                            .Any(p => p.ProductName.ToLower().Contains(text.ToLower())));
+                    }
+                }
+                if (userOrderStatusId != 0) {
+                    query = query.Where(v => v.UserOrderStatusId == userOrderStatusId);
+                }
+
+                var userOrders = await query.Skip(offset).Take(limit).ToListAsync();
+                var totalOrders = await query.CountAsync();
+
 
                 var userOrderDTOs = new List<UserOrderDTO>();
 
@@ -308,6 +319,31 @@ namespace nike_website_backend.Services
                     var code = userOrder.OrderCodeReturn != null ? userOrder.OrderCodeReturn : userOrder.OrderCode;
                     
                     var serviceLogs = await GetOrderDetailGHNAsync1(code);
+
+                    if (serviceLogs != null)
+                    {
+                        if (serviceLogs.GhnStatus == "ready_to_pick" && userOrder.UserOrderStatusId != 2 && userOrder.UserOrderStatusId != 6 && userOrder.OrderCodeReturn == null)
+                        {
+
+                            userOrder.UserOrderStatusId = 2;
+
+                        }
+                        else if (serviceLogs.GhnStatus == "picked" && userOrder.UserOrderStatusId != 3 && userOrder.UserOrderStatusId != 6 && userOrder.OrderCodeReturn == null)
+                        {
+                            userOrder.UserOrderStatusId = 3;
+                        }
+                        else if (serviceLogs.GhnStatus == "cancel" && userOrder.UserOrderStatusId != 5 && userOrder.UserOrderStatusId != 6 && userOrder.OrderCodeReturn == null)
+                        {
+                            userOrder.UserOrderStatusId = 6;
+                        }
+                        else if (serviceLogs.GhnStatus == "delivered" && userOrder.ReturnExpirationDate == null && userOrder.OrderCodeReturn == null)
+                        {
+                            userOrder.UserOrderStatusId = 4;
+                            userOrder.ReturnExpirationDate = DateTime.Now.AddDays(7);
+                        }
+                        await _context.SaveChangesAsync();
+                      
+                    }
 
                     userOrderDTOs.Add(new UserOrderDTO
                     {
@@ -339,12 +375,16 @@ namespace nike_website_backend.Services
                     });
                 }
 
+
+                var totalPages = (int)Math.Ceiling((double)totalOrders / limit);
+
                 // Trả về danh sách đơn hàng trong một đối tượng Response
                 return new Response<List<UserOrderDTO>>
                 {
                     StatusCode = 200,
                     Data = userOrderDTOs,
-                    Message = "Lấy danh sách đơn hàng thành công."
+                    Message = "Lấy danh sách đơn hàng thành công.",
+                    TotalPages = totalPages,
                 };
             }
             catch (Exception ex)
@@ -359,6 +399,24 @@ namespace nike_website_backend.Services
             }
         }
 
+
+        public async Task<Response<List<UserOrderStatus>>> GetStatusList()
+        {
+            Response<List<UserOrderStatus>> res = new Response<List<UserOrderStatus>>();
+            var list = new List<UserOrderStatus>();
+            list.Add(new UserOrderStatus
+            {
+                UserOrderStatusId = 0,
+                UserOrderStatusName = "Tất Cả",
+                
+            });
+            var items = await _context.UserOrderStatuses.ToListAsync();
+            list.AddRange(items);
+            res.StatusCode = 200;
+            res.Message = "Lấy Dữ liệu thành công";
+            res.Data = list;
+            return res;
+        }
 
     }
 }

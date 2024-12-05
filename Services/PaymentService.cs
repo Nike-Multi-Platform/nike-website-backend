@@ -152,7 +152,7 @@ namespace nike_website_backend.Services
                                 registerFlashSaleTimeFrame.UpdatedAt = DateTime.Now;
                             }
                         }
-                        var productSize = await _context.ProductSizes
+                        var productSize = await _context.ProductSizes.Include(ps=>ps.Product)
                          .Where(ps => ps.ProductSizeId == bagItem.product_size_id)
                          .FirstOrDefaultAsync();
                         Console.WriteLine($"productSize: {productSize.ProductSizeId}");
@@ -172,6 +172,7 @@ namespace nike_website_backend.Services
                             response.Success = false;
                             return response;
                         }
+                        productSize.Product.Sold += bagItem.amount;
                         productSize.Soluong -= bagItem.amount;
 
                         // Update the ProductSize in the database
@@ -343,10 +344,11 @@ namespace nike_website_backend.Services
                     {
                         flashSaleItems.Sold -= item.Amount;
                     }
-                    var productSize = await _context.ProductSizes.Where(v => v.ProductSizeId == item.ProductSizeId).FirstOrDefaultAsync();
+                    var productSize = await _context.ProductSizes.Include(p=>p.Product).Where(v => v.ProductSizeId == item.ProductSizeId).FirstOrDefaultAsync();
                     if (productSize != null)
                     {
                         productSize.Soluong += item.Amount;
+                        productSize.Product.Sold -= item.Amount;
                     }
                 }
                 await _context.SaveChangesAsync();

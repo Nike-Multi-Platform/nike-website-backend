@@ -15,7 +15,7 @@ namespace nike_website_backend.Controllers
         }
 
         [HttpGet("get-orders")]
-        public async Task<IActionResult> GetUserOrder([FromQuery]string userId, [FromQuery] int userOrderStatusId, [FromQuery] string text, [FromQuery] int limit, [FromQuery] int page)
+        public async Task<IActionResult> GetUserOrder([FromQuery]string userId, [FromQuery] int userOrderStatusId, [FromQuery] string? text, [FromQuery] int limit, [FromQuery] int page)
         {
             return Ok(await _userOrderRepository.GetUserOrder(userId, userOrderStatusId, text, limit, page));
         }
@@ -24,6 +24,11 @@ namespace nike_website_backend.Controllers
         public async Task<IActionResult> GetOrderDetailGHNAsync(string orderCode)
         {
             return Ok(await _userOrderRepository.GetOrderDetailGHNAsync(orderCode));
+        }
+        [HttpGet("order-status")]
+        public async Task<IActionResult> GetStatusList()
+        {
+            return Ok(await _userOrderRepository.GetStatusList());
         }
     }
 
