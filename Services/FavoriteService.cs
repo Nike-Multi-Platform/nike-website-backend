@@ -83,8 +83,10 @@ namespace nike_website_backend.Services
             var offset = (page - 1) * limit;
             var thirtyDaysAgo = DateTime.Now.AddDays(-30);
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
             FlashSaleTimeFrame flashSaleTimeFrame = null;
-            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             if (flashSale != null)
             {

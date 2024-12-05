@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using nike_website_backend.Interfaces;
 using nike_website_backend.Models;
 using nike_website_backend.Services;
@@ -22,6 +22,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;  // Tương tự như ReferenceLoopHandling.Ignore trong Newtonsoft.Json
+
+    });
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IProductRepository, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryService>();
@@ -29,6 +36,8 @@ builder.Services.AddScoped<IUserAccountRepository, UserAccountService>();
 builder.Services.AddScoped<IFlashSaleRepository,FlashSaleService>();
 builder.Services.AddScoped<IBagRepository, BagService>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentService>();
+builder.Services.AddScoped<IUserOrderRepository, UserOrderService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp", policyBuilder =>
@@ -54,7 +63,7 @@ catch (Exception ex)
     Console.WriteLine($"Error initializing Firebase: {ex.Message}");
     throw;
 }
-
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

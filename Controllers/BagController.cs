@@ -54,6 +54,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _bagRepository.getTotalAmount(userId));
         }
+        [HttpGet("apply-voucher")]
+        public async Task<IActionResult> applyVoucher([FromQuery] string userId,[FromQuery] string promoCode)
+        {
+            return Ok(await _bagRepository.applyVoucher(userId, promoCode));
+        }
     }
         
     }

@@ -150,10 +150,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("ended_at");
             entity.Property(e => e.MinOrderValue).HasColumnName("min_order_value");
-            entity.Property(e => e.Quantity)
-                .HasMaxLength(10)
-                .IsFixedLength()
-                .HasColumnName("quantity");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.StartedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("started_at");
@@ -838,6 +835,10 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("money")
                 .HasColumnName("total_price");
             entity.Property(e => e.TotalQuantity).HasColumnName("total_quantity");
+            entity.Property(e => e.TransactionCode)
+                .HasMaxLength(120)
+                .IsUnicode(false)
+                .HasColumnName("transaction_code");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -871,6 +872,19 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.UserOrderId).HasColumnName("user_order_id");
             entity.Property(e => e.ProductSizeId).HasColumnName("product_size_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.OnRegisterFlashSalesId).HasColumnName("on_register_flash_sales_id");
+            entity.Property(e => e.Price)
+                .HasColumnType("money")
+                .HasColumnName("price");
+            entity.Property(e => e.ProductName)
+                .HasMaxLength(100)
+                .HasColumnName("product_name");
+            entity.Property(e => e.SizeName)
+                .HasMaxLength(50)
+                .HasColumnName("size_name");
+            entity.Property(e => e.Thumbnail)
+                .HasColumnType("text")
+                .HasColumnName("thumbnail");
 
             entity.HasOne(d => d.ProductSize).WithMany(p => p.UserOrderProducts)
                 .HasForeignKey(d => d.ProductSizeId)

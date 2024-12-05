@@ -27,9 +27,9 @@ public partial class UserOrder
 
     public DateTime UpdatedAt { get; set; }
 
-    public string OrderCode { get; set; } = null!;
+    public string? OrderCode { get; set; }
 
-    public string OrderCodeReturn { get; set; } = null!;
+    public string? OrderCodeReturn { get; set; }
 
     public DateTime? ReturnExpirationDate { get; set; }
 
@@ -52,6 +52,8 @@ public partial class UserOrder
     public decimal FinalPrice { get; set; }
 
     public string GhnService { get; set; } = null!;
+
+    public string? TransactionCode { get; set; }
 
     public virtual ICollection<ReturnRequest> ReturnRequests { get; set; } = new List<ReturnRequest>();
 

@@ -84,11 +84,15 @@ namespace nike_website_backend.Services
             Response<List<BagDto>> res = new Response<List<BagDto>>();
             var thirtyDaysAgo = DateTime.Now.AddDays(-30);
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
             FlashSaleTimeFrame flashSaleTimeFrame = null;
-            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active") ).FirstOrDefaultAsync();
 
             if (flashSale != null)
             {
+     
+            
                 flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             }
@@ -115,6 +119,10 @@ namespace nike_website_backend.Services
                          b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
                             .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
                                       r.Quantity - r.Sold > 0) ? (int)(b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).Quantity - b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).Sold) :  b.ProductSize.Soluong,
+                   length = b.ProductSize.Product.ProductParent.Length,
+                   weight = b.ProductSize.Product.ProductParent.Weight,
+                   width = b.ProductSize.Product.ProductParent.Width,
+                   height = b.ProductSize.Product.ProductParent.Height,
                    price = b.ProductSize.Product.ProductParent.ProductPrice,
                    salePrice = b.ProductSize.Product.SalePrices,
                    finalPrice = flashSaleTimeFrame != null &&
@@ -123,25 +131,19 @@ namespace nike_website_backend.Services
                                       r.Quantity - r.Sold > 0)
             ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : b.ProductSize.Product.SalePrices > 0 ? b.ProductSize.Product.SalePrices : b.ProductSize.Product.ProductParent.ProductPrice,
                 },
-                RegisterFlashSaleProduct = new RegisterFlashSaleProductDTO
-                {
-                    RegisterFlashSaleProduct = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
-                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
-                                      r.Quantity - r.Sold > 0)
-            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId)
-            : null, started_at = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
-                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
-                                      r.Quantity - r.Sold > 0)
-            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSaleTimeFrame.StartedAt : null,
-                    ended_at = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
-                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
-                                      r.Quantity - r.Sold > 0)
-            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSaleTimeFrame.EndedAt : null,
-                    status = flashSaleTimeFrame != null && b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
-                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
-                                      r.Quantity - r.Sold > 0)
-            ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSaleTimeFrame.Status : null
-                },
+                RegisterFlashSaleProduct = b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+            .Where(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId && r.Quantity - r.Sold > 0)
+            .Select(r => new RegisterFlashSaleProductDTO
+            {
+                RegisterFlashSaleProduct1 = r.RegisterFlashSaleProduct1,
+                Quantity = r.Quantity,
+                Sold = r.Sold,
+                FlashSaleTimeFrameId = r.FlashSaleTimeFrameId,
+                started_at = r.FlashSaleTimeFrame.StartedAt,
+                ended_at = r.FlashSaleTimeFrame.EndedAt,
+                status = r.FlashSaleTimeFrame.Status
+            })
+            .FirstOrDefault(),
                 
 
             }).AsNoTracking().AsQueryable();
@@ -152,7 +154,41 @@ namespace nike_website_backend.Services
             res.Data = bags;
             return res;
         }
+        public async Task<Response<DiscountVoucher>> applyVoucher(string userId, string promoCode)
+        {
+            Response<DiscountVoucher> response = new Response<DiscountVoucher>();
+         
+            var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
+            var discountVoucher = await _context.DiscountVouchers.Where(v => v.VoucherCode == promoCode && v.StartedAt <= localCurrentDate && v.EndedAt > localCurrentDate && v.Quantity > 0).FirstOrDefaultAsync();
+   
+           
+            if (discountVoucher == null)
+            {
+                response.StatusCode = 404;
+                response.Message = "Voucher not available";
+                response.Data = null;
+                return response;
+            }
+   
+            var usage = await _context.UserDiscountVouchers.Where(v => v.UserId == userId && v.DiscountVoucherId == discountVoucher.DiscountVoucherId).FirstOrDefaultAsync();
+            if (usage != null)
+            {
+                if(usage.TotalUsed == discountVoucher.Usage)
+                {
+                    response.StatusCode = 404;
+                    response.Message = "You have used up all your vouchers.";
+                    response.Data = null;
+                    return response;
+                }
+            }
+            response.StatusCode = 200;
+            response.Message = "Voucher applied Successfully";
+            response.Data = discountVoucher;
+            return response;
 
+        }
         public async Task<Response<Boolean>> removeBagItem (int bag_id)
         {
             Response<Boolean> res = new Response<Boolean>();
@@ -235,7 +271,7 @@ namespace nike_website_backend.Services
             var bagToUpdate = await _context.Bags.FirstOrDefaultAsync(b => b.BagId == bag_id);
             if (bagToUpdate != null)
             {
-                bagToUpdate.Amount = bagItem.amount;
+                bagToUpdate.Amount = (int)bagItem.amount;
                 try
                 {
                     await _context.SaveChangesAsync();

@@ -15,14 +15,16 @@ namespace nike_website_backend.Services
         public async Task<Response<FlashSaleTimeFrameDto>> getActiveFlashSale(int limit){
             Response<FlashSaleTimeFrameDto> res = new Response<FlashSaleTimeFrameDto>();
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
             var flashSale = await _context.FlashSales
-                 .Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")
+                 .Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")
                       
                        )
                  .FirstOrDefaultAsync();
             if(flashSale == null)
             {
-                flashSale = await _context.FlashSales.Where(f=> f.StartedAt > currentDate && f.Status.Equals("waiting")).OrderBy(f=>f.StartedAt).FirstOrDefaultAsync();
+                flashSale = await _context.FlashSales.Where(f=> f.StartedAt > localCurrentDate && f.Status.Equals("waiting")).OrderBy(f=>f.StartedAt).FirstOrDefaultAsync();
             }
             if (flashSale == null) {
                 flashSale = await _context.FlashSales.Where(f => f.Status.Equals("ended")).OrderByDescending(f => f.EndedAt).FirstOrDefaultAsync();

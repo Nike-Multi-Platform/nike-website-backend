@@ -9,7 +9,17 @@ public partial class UserOrderProduct
 
     public int ProductSizeId { get; set; }
 
-    public int? Amount { get; set; }
+    public int Amount { get; set; }
+
+    public string Thumbnail { get; set; } = null!;
+
+    public string ProductName { get; set; } = null!;
+
+    public string SizeName { get; set; } = null!;
+
+    public decimal Price { get; set; }
+
+    public int? OnRegisterFlashSalesId { get; set; }
 
     public virtual ProductSize ProductSize { get; set; } = null!;
 

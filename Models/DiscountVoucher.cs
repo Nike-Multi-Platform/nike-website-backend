@@ -15,7 +15,7 @@ public partial class DiscountVoucher
 
     public int Usage { get; set; }
 
-    public string Quantity { get; set; } = null!;
+    public int Quantity { get; set; }
 
     public int MinOrderValue { get; set; }
 

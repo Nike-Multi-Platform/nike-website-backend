@@ -120,10 +120,12 @@ namespace nike_website_backend.Services
         public async Task<Response<ProductParentDto>> GetProductParentDetail(int productParentId)
         {
             Response<ProductParentDto> response = new Response<ProductParentDto>();
-            var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
             FlashSaleTimeFrame flashSaleTimeFrame = null;
-            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             if (flashSale != null)
             {
@@ -176,15 +178,19 @@ namespace nike_website_backend.Services
             Response<List<ProductParentDto>> response = new Response<List<ProductParentDto>>();
             var thirtyDaysAgo = DateTime.Now.AddDays(-30);
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
+            DateTime localThirtyDaysAgo = TimeZoneInfo.ConvertTime(thirtyDaysAgo, localTimeZone);
+
             FlashSaleTimeFrame flashSaleTimeFrame = null;
-            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             if (flashSale != null)
             {
                 flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             }
-            var query = _context.ProductParents.Where(p => p.CreatedAt >= thirtyDaysAgo && p.CreatedAt <= currentDate).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
+            var query = _context.ProductParents.OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
             {
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
@@ -243,7 +249,7 @@ namespace nike_website_backend.Services
             // Sắp xếp theo createAt (xong)
             if (queryObject.SortBy == "createAt")
             {
-                query = queryObject.IsSortAscending ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.ProductPrice);
+                query = queryObject.IsSortAscending ? query.OrderBy(p=>p.CreatedAt) : query.OrderByDescending(p => p.ProductPrice);
             }
             // Sắp xếp theo giá (xong)
             if (queryObject.SortBy == "price")
@@ -287,15 +293,19 @@ namespace nike_website_backend.Services
             Response<List<ProductParentDto>> response = new Response<List<ProductParentDto>>();
             var thirtyDaysAgo = DateTime.Now.AddDays(-30);
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
+            DateTime localThirtyDaysAgo = TimeZoneInfo.ConvertTime(thirtyDaysAgo, localTimeZone);
+
             FlashSaleTimeFrame flashSaleTimeFrame = null;
-            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             if (flashSale != null)
             {
                 flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             }
-            var query = _context.ProductParents.Where(p => p.CreatedAt >= thirtyDaysAgo && p.CreatedAt <= currentDate).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
+            var query = _context.ProductParents.Where(p => p.CreatedAt >= localThirtyDaysAgo && p.CreatedAt <= localCurrentDate).OrderByDescending(p => p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong))).Select(p => new ProductParentDto
             {
                 ProductParentId = p.ProductParentId,
                 ProductParentName = p.ProductParentName,
@@ -332,7 +342,9 @@ namespace nike_website_backend.Services
             Response<List<ProductParentDto>> res = new Response<List<ProductParentDto>>();
             FlashSaleTimeFrame flashSaleTimeFrame = null;
             var currentDate = DateTime.Now;
-            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
 
             if (flashSale != null)
             {
@@ -418,8 +430,10 @@ namespace nike_website_backend.Services
 
             FlashSaleTimeFrame flashSaleTimeFrame = null;
             var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
             var flashSale = await _context.FlashSales
-                .Where(f => f.StartedAt <= currentDate && f.EndedAt > currentDate && f.Status.Equals("active"))
+                .Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active"))
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
