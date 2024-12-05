@@ -236,10 +236,13 @@ namespace nike_website_backend.Services
 
             // Sort ...
             // Theo giới tính(xong)
-            int[] objectIds = { 1, 2, 3 }; // 1 nam, 2 nữ, 3 kid
-            if (objectIds.Contains(queryObject.productObjectId))
+            string[] objectIdsString = queryObject.productObjectId.Split(',');
+            int[] objectIds = Array.ConvertAll(objectIdsString, int.Parse);
+
+            // Filter query based on productObjectIds
+            if (objectIds.Intersect(new int[] { 1, 2 }).Any())
             {
-                query = query.Where(p => p.ProductObjectId == queryObject.productObjectId);
+                query = query.Where(p => objectIds.Contains(p.ProductObjectId));
             }
             // Sắp xếp theo tên (xong)
             if (queryObject.SortBy == "productName")
