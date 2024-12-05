@@ -13,22 +13,30 @@ namespace nike_website_backend.Libraries
         private readonly SortedList<string, string> _responseData = new SortedList<string, string>(new VnPayCompare());
         public PaymentResponseModel GetFullResponseData(IQueryCollection collection, string hashSecret)
         {
+            Console.WriteLine("vô rồi nè");
             var vnPay = new VnPayLibrary();
-            foreach (var (key, value) in collection)
+       
+            foreach (var item in collection)
             {
-                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+                if (!string.IsNullOrEmpty(item.Key) && item.Key.StartsWith("vnp_"))
                 {
-                    vnPay.AddResponseData(key, value);
+                    vnPay.AddResponseData(item.Key, item.Value);
                 }
             }
+        
             var orderId = Convert.ToInt64(vnPay.GetResponseData("vnp_TxnRef"));
             var vnPayTranId = Convert.ToInt64(vnPay.GetResponseData("vnp_TransactionNo"));
             var vnpResponseCode = vnPay.GetResponseData("vnp_ResponseCode");
             var vnpSecureHash =
                 collection.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value; //hash của dữ liệu trả về
+        
             var orderInfo = vnPay.GetResponseData("vnp_OrderInfo");
+
+            Console.WriteLine($"vnpSecureHash: {vnpSecureHash}");
+            Console.WriteLine($"hashSecret: {hashSecret}");
             var checkSignature =
                 vnPay.ValidateSignature(vnpSecureHash, hashSecret); //check Signature
+ 
             if (!checkSignature)
                 return new PaymentResponseModel()
                 {
@@ -110,25 +118,31 @@ namespace nike_website_backend.Libraries
                 signData = signData.Remove(data.Length - 1, 1);
             }
 
-            var vnpSecureHash = HmacSha512(vnpHashSecret, signData);
+            var vnpSecureHash = HmacSHA512(vnpHashSecret, signData);
             baseUrl += "vnp_SecureHash=" + vnpSecureHash;
 
             return baseUrl;
         }
+        //public bool ValidateSignature(string inputHash, string secretKey)
+        //{
+        //    var rspRaw = GetResponseData();
+        //    var myChecksum = HmacSha512(secretKey, rspRaw);
+        //    return myChecksum.Equals(inputHash, StringComparison.InvariantCultureIgnoreCase);
+        //}
         public bool ValidateSignature(string inputHash, string secretKey)
         {
-            var rspRaw = GetResponseData();
-            var myChecksum = HmacSha512(secretKey, rspRaw);
+            string rspRaw = GetResponseData();
+            string myChecksum = HmacSHA512(secretKey, rspRaw);
             return myChecksum.Equals(inputHash, StringComparison.InvariantCultureIgnoreCase);
         }
-        private string HmacSha512(string key, string inputData)
+        public static String HmacSHA512(string key, String inputData)
         {
             var hash = new StringBuilder();
-            var keyBytes = Encoding.UTF8.GetBytes(key);
-            var inputBytes = Encoding.UTF8.GetBytes(inputData);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            byte[] inputBytes = Encoding.UTF8.GetBytes(inputData);
             using (var hmac = new HMACSHA512(keyBytes))
             {
-                var hashValue = hmac.ComputeHash(inputBytes);
+                byte[] hashValue = hmac.ComputeHash(inputBytes);
                 foreach (var theByte in hashValue)
                 {
                     hash.Append(theByte.ToString("x2"));

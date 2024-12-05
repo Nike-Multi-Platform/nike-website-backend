@@ -35,10 +35,10 @@ namespace nike_website_backend.Controllers
         public async Task<IActionResult> PaymentExecute()
         {
             var collections = _httpContextAccessor.HttpContext.Request.Query;
-            foreach (var item in collections)
-            {
-                Console.WriteLine($"Key: {item.Key}, Value: {item.Value}");
-            }
+            //foreach (var item in collections)
+            //{
+            //    Console.WriteLine($"Key: {item.Key}, Value: {item.Value}");
+            //}
             return Ok(await _paymentRepository.PaymentExecute(collections));
         }
 

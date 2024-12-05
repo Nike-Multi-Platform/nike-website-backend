@@ -131,7 +131,7 @@ namespace nike_website_backend.Services
                                       r.Quantity - r.Sold > 0)
             ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : b.ProductSize.Product.SalePrices > 0 ? b.ProductSize.Product.SalePrices : b.ProductSize.Product.ProductParent.ProductPrice,
                 },
-                RegisterFlashSaleProduct = b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
+                RegisterFlashSaleProduct = flashSaleTimeFrame != null ? b.ProductSize.Product.ProductParent.RegisterFlashSaleProducts
             .Where(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId && r.Quantity - r.Sold > 0)
             .Select(r => new RegisterFlashSaleProductDTO
             {
@@ -143,7 +143,7 @@ namespace nike_website_backend.Services
                 ended_at = r.FlashSaleTimeFrame.EndedAt,
                 status = r.FlashSaleTimeFrame.Status
             })
-            .FirstOrDefault(),
+            .FirstOrDefault() : null,
                 
 
             }).AsNoTracking().AsQueryable();

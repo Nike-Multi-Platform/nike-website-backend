@@ -298,32 +298,66 @@ namespace nike_website_backend.Services
         {
             // Khởi tạo đối tượng Response để trả về
             var res = new Response<String>();
-
+        
             var pay = new VnPayLibrary();
-
+ 
             // Lấy dữ liệu phản hồi từ VnPay và giải mã
-            var response = pay.GetFullResponseData(collections, _configuration["Vnpay:HashSecret"]);
+            //var response =  pay.GetResponseData("vnp_ResponseCode");
+           
             string vnpTxnRef = collections["vnp_TxnRef"];
-            Console.WriteLine($"{vnpTxnRef}");
+            string responseCode = collections["vnp_ResponseCode"];
+
+
             var foundOrder = await _context.UserOrders.Where(v => v.TransactionCode == vnpTxnRef).FirstOrDefaultAsync();
             if (foundOrder == null) {
                 res.StatusCode = 404;
                 res.Message = "Order Not Found";
                 res.Data = "fail";
                 return res;
-            }else if(foundOrder.UserOrderStatusId == 5)
-            {
-                res.StatusCode = 200;
-                res.Message = "Order has been processed";
-                res.Data = "success";
-                return res;
             }
+            if (responseCode != "00" && foundOrder.UserOrderStatusId != 5)
+            {
+                foundOrder.UserOrderStatusId = 5;
+                foundOrder.IsCanceledBy = 0;
+                foundOrder.IsProcessed = 1;
+                if (foundOrder.VouchersApplied != null)
+                {
+                    var voucherId = int.Parse(foundOrder.VouchersApplied);
+                    var voucher = await _context.DiscountVouchers.Where(v => v.DiscountVoucherId == voucherId).FirstOrDefaultAsync();
+                    if (voucher != null)
+                    {
+                        voucher.Quantity += 1;
+                        var usage = await _context.UserDiscountVouchers.Where(v => v.UserId == foundOrder.UserId && v.DiscountVoucherId == voucher.DiscountVoucherId).FirstOrDefaultAsync();
+                        if (usage != null)
+                        {
+                            usage.TotalUsed -= 1;
+                        }
+                    }
+                }
 
-          
+                var orderItems = await _context.UserOrderProducts.Where(v => v.UserOrderId == foundOrder.UserOrderId).ToListAsync();
+                foreach (var item in orderItems)
+                {
+                    var flashSaleItems = await _context.RegisterFlashSaleProducts.Where(v => v.RegisterFlashSaleProduct1 == item.OnRegisterFlashSalesId).FirstOrDefaultAsync();
+                    if (flashSaleItems != null)
+                    {
+                        flashSaleItems.Sold -= item.Amount;
+                    }
+                    var productSize = await _context.ProductSizes.Where(v => v.ProductSizeId == item.ProductSizeId).FirstOrDefaultAsync();
+                    if (productSize != null)
+                    {
+                        productSize.Soluong += item.Amount;
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
+            
+            
+
 
             // Kiểm tra nếu có dữ liệu trả về
 
-            switch (response.VnPayResponseCode)
+            switch (responseCode)
             {
                 case "00":
                     // Transaction success
@@ -422,38 +456,6 @@ namespace nike_website_backend.Services
                     res.Message = "Unknown response code.";
                     res.Data = "fail";
                     break;
-            }
-            if (response.VnPayResponseCode != "00")
-            {
-                foundOrder.UserOrderStatusId = 5;
-                foundOrder.IsCanceledBy = 0;
-                foundOrder.IsProcessed = 1;
-                var voucherId = int.Parse(foundOrder.VouchersApplied);
-                var voucher = await _context.DiscountVouchers.Where(v => v.DiscountVoucherId == voucherId).FirstOrDefaultAsync();
-                if (voucher != null)
-                {
-                    voucher.Quantity += 1;
-                    var usage = await _context.UserDiscountVouchers.Where(v => v.UserId == foundOrder.UserId && v.DiscountVoucherId == voucher.DiscountVoucherId).FirstOrDefaultAsync();
-                    if (usage != null)
-                    {
-                        usage.TotalUsed -= 1;
-                    }
-                }
-                var orderItems = await _context.UserOrderProducts.Where(v => v.UserOrderId == foundOrder.UserOrderId).ToListAsync();
-                foreach (var item in orderItems)
-                {
-                    var flashSaleItems = await _context.RegisterFlashSaleProducts.Where(v => v.RegisterFlashSaleProduct1 == item.OnRegisterFlashSalesId).FirstOrDefaultAsync();
-                    if (flashSaleItems != null)
-                    {
-                        flashSaleItems.Sold -= item.Amount;
-                    }
-                    var productSize = await _context.ProductSizes.Where(v => v.ProductSizeId == item.ProductSizeId).FirstOrDefaultAsync();
-                    if (productSize != null)
-                    {
-                        productSize.Soluong += item.Amount;
-                    }
-                }
-                await _context.SaveChangesAsync();
             }
 
             return res;
