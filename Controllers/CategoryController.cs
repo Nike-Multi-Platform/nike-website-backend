@@ -19,5 +19,12 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _categoryRepository.getSubCategoriesByCategoryId(categoryId));
         }
+
+        // from query
+        [HttpGet("subcategories-category-object")]
+        public async Task<IActionResult> getCategoriesByCatAndObject([FromQuery] int categoryId, [FromQuery] int productObjectId)
+        {
+            return Ok(await _categoryRepository.getCategoriesByCatAndObject(categoryId, productObjectId));
+        }
     }
 }
