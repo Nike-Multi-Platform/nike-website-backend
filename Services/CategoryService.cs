@@ -43,5 +43,48 @@ namespace nike_website_backend.Services
             return response;
         }
 
+        public async Task<Response<List<CategoryDto>>> getCategoriesByCatAndObject(int categoryId, int productObjectId)
+        {
+            Response<List<CategoryDto>> response = new Response<List<CategoryDto>>();
+            var query = _context.Categories.AsQueryable();
+
+            if (categoryId > 0)
+            {
+                query = query.Where(c => c.CategoriesId == categoryId);
+            }
+
+            if (productObjectId > 0)
+            {
+                query = query.Where(c => c.ProductObjectId == productObjectId);
+            }
+
+            var categories = await query
+                .Select(c => new CategoryDto
+                {
+                    CategoryId = c.CategoriesId,
+                    CategoryName = c.CategoriesName,
+                    SubCategories = c.SubCategories
+                        .Select(sc => new SubCategoryDto
+                        {
+                            SubCategoryId = sc.SubCategoriesId,
+                            SubCategoryName = sc.SubCategoriesName,
+                            CategoryId = sc.CategoriesId
+                        }).ToList()
+                })
+                .Where(c => c.SubCategories.Any()) // Filter out categories without subcategories
+                .ToListAsync();
+
+            if (!categories.Any())
+            {
+                response.StatusCode = 404;
+                response.Message = "Không tìm thấy danh mục";
+                return response;
+            }
+
+            response.StatusCode = 200;
+            response.Message = "Lấy danh mục thành công";
+            response.Data = categories;
+            return response;
+        }
     }
 }
