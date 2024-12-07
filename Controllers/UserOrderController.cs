@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using nike_website_backend.Dtos;
 using nike_website_backend.Interfaces;
 
 namespace nike_website_backend.Controllers
@@ -29,6 +30,11 @@ namespace nike_website_backend.Controllers
         public async Task<IActionResult> GetStatusList()
         {
             return Ok(await _userOrderRepository.GetStatusList());
+        }
+        [HttpPost("write-review")]
+        public async Task<IActionResult> WriteReviews([FromBody]ReviewResponse review)
+        {
+            return Ok(await _userOrderRepository.WriteReviews(review));
         }
     }
 
