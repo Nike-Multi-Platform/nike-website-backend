@@ -63,5 +63,11 @@ namespace nike_website_backend.Controllers
             return Ok(await _productRepository.getRecommendProductParent(userId,limit));
         }
 
+        [HttpGet("search-filter")]
+        public async Task<IActionResult> SearchFilter([FromQuery] SearchFilterQueryObject queryObject)
+        {
+            return Ok(await _productRepository.SearchFilter(queryObject));
+        }
+
     }
 }
