@@ -3,6 +3,7 @@ using nike_website_backend.Dtos;
 using nike_website_backend.Helpers;
 using nike_website_backend.Interfaces;
 using nike_website_backend.Models;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text.RegularExpressions;
 
@@ -511,7 +512,190 @@ namespace nike_website_backend.Services
             return res;
         }
 
+        public async Task<Response<List<ProductParentDto>>> SearchFilter(SearchFilterQueryObject queryObject)
+        {
+            Response<List<ProductParentDto>> res = new Response<List<ProductParentDto>>();
+            // if product name != "" => search by product name dont care about subcategory, SubCategoryId, productObjectId, product_color_shown
+            var offset = (queryObject.Page - 1) * queryObject.PageSize;
+            var currentDate = DateTime.Now;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(currentDate, localTimeZone);
+
+            FlashSaleTimeFrame flashSaleTimeFrame = null;
+            var flashSale = await _context.FlashSales.Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+
+            if (flashSale != null)
+            {
+                flashSaleTimeFrame = await _context.FlashSaleTimeFrames.Where(t => t.FlashSaleId == flashSale.FlashSaleId && t.Status.Equals("active")).AsNoTracking().FirstOrDefaultAsync();
+
+            }
+            if (queryObject.searchText != "")
+            {
+                // search by product name
+                var query = _context.ProductParents.Where(p => p.ProductParentName.Contains(queryObject.searchText)).Select(p => new ProductParentDto
+                {
+                    ProductParentId = p.ProductParentId,
+                    ProductParentName = p.ProductParentName,
+                    ProductIconsId = p.ProductIconsId,
+                    Thumbnail = p.Thumbnail,
+                    ProductPrice = p.ProductPrice,
+                    IsNew = p.IsNewRelease,
+                    SubCategoriesId = p.SubCategoriesId,
+                    CreatedAt = p.CreatedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
+                    salePrice = p.Products.Any() && p.Products.Where(p => p.SalePrices > 0).Any()
+                    ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices)
+                    : 0,
+
+                    finalPrice = p.Products.Any() && p.Products.Where(p => p.SalePrices > 0).Any()
+                    ? p.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices)
+                    : p.ProductPrice,
+                    quantityInStock = p.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
+                    sold = p.Products.Sum(t => t.Sold),
+                }).AsQueryable();
+
+                // sort by final price, sold , createAt
+                if (queryObject.SortBy == "price")
+                {
+                    query = queryObject.IsSortAscending ? query.OrderBy(p => p.finalPrice) : query.OrderByDescending(p => p.finalPrice);
+                }
+
+                if (queryObject.SortBy == "sold")
+                {
+                    query = query.OrderBy(p => p.sold);
+                }
+                if (queryObject.SortBy == "createAt")
+                {
+                    query = query.OrderBy(p => p.CreatedAt);
+                }
+
+                if (queryObject.MinPrice > 0 && queryObject.MaxPrice > 0)
+                {
+                    if (queryObject.MinPrice <= queryObject.MaxPrice)
+                    {
+                        query = query.Where(p => p.finalPrice >= queryObject.MinPrice && p.finalPrice <= queryObject.MaxPrice);
+                    }
+                }
+                var productParents = query.Skip(offset).Take(queryObject.PageSize).ToList();
+                var totalProducts = query.Count();
+
+                if (totalProducts == 0)
+                {
+                    res.StatusCode = 404;
+                    res.Message = "Không tìm thấy sản phẩm";
+                    res.Data = null;
+                    return res;
+                }
+
+                var totalPages = (int)Math.Ceiling((double)totalProducts / queryObject.PageSize);
+                res.StatusCode = 200;
+                res.Message = "Lấy dữ liệu thành công";
+                res.Data = productParents;
+                res.TotalPages = totalPages;
+                return res;
+            }
+            else
+            {
+                // Khởi tạo query ban đầu
+                var query = _context.ProductParents.AsQueryable();
+
+                // Lọc theo SubCategoryId
+                if (queryObject.sub_categories_id > 0)
+                {
+                    query = query.Where(p => p.SubCategoriesId == queryObject.sub_categories_id);
+                }
+
+                // Lọc theo productObjectId
+                if (queryObject.productObjectId != null && queryObject.productObjectId.Any(id => id != -1))
+                {
+                    query = query.Where(p => queryObject.productObjectId.Contains(p.SubCategories.Categories.ProductObjectId ?? -1));
+                }
+                // lọc theo product_color_shown
+                if (queryObject.product_color_shown != null && queryObject.product_color_shown.Any())
+                {
+                    var normalizedColors = queryObject.product_color_shown.Select(color => color.ToLower()).ToList();
+
+                    query = query.Where(p => p.Products.Any(pr =>
+                        !string.IsNullOrEmpty(pr.ProductColorShown) &&
+                        normalizedColors.Contains(pr.ProductColorShown.ToLower())
+                    ));
+                }
+
+                // Lọc theo MinPrice và MaxPrice
+                if (queryObject.MinPrice > 0 && queryObject.MaxPrice > 0 && queryObject.MinPrice <= queryObject.MaxPrice)
+                {
+                    query = query.Where(p => p.Products.Any(prod =>
+                        prod.SalePrices > 0
+                        ? prod.SalePrices >= queryObject.MinPrice && prod.SalePrices <= queryObject.MaxPrice
+                        : p.ProductPrice >= queryObject.MinPrice && p.ProductPrice <= queryObject.MaxPrice));
+                }
+
+
+                // Thực hiện phân trang
+                var totalProducts = await query.CountAsync();
+                var productParents = await query
+                    .Skip(offset)
+                    .Take(queryObject.PageSize)
+                    .Select(p => new ProductParentDto
+                    {
+                        ProductParentId = p.ProductParentId,
+                        ProductParentName = p.ProductParentName,
+                        ProductIconsId = p.ProductIconsId,
+                        Thumbnail = p.Thumbnail,
+                        ProductPrice = p.ProductPrice,
+                        IsNew = p.IsNewRelease,
+                        SubCategoriesId = p.SubCategoriesId,
+                        CreatedAt = p.CreatedAt,
+                        UpdatedAt = p.UpdatedAt,
+                        categoryWithObjectName = p.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.SubCategories.Categories.CategoriesName,
+                        salePrice = p.Products.Any(prod => prod.SalePrices > 0)
+                            ? p.Products.Where(prod => prod.SalePrices > 0).Min(prod => prod.SalePrices)
+                            : 0,
+                        finalPrice = p.Products.Any(prod => prod.SalePrices > 0)
+                            ? p.Products.Where(prod => prod.SalePrices > 0).Min(prod => prod.SalePrices)
+                            : p.ProductPrice,
+                        quantityInStock = p.Products.Sum(prod => prod.ProductSizes.Sum(size => size.Soluong)),
+                        sold = p.Products.Sum(prod => prod.Sold),
+                    })
+                    .ToListAsync();
+
+                // sort by final price, sold , createAt
+                if (queryObject.SortBy == "price")
+                {
+                    productParents = queryObject.IsSortAscending
+                        ? productParents.OrderBy(p => p.finalPrice).ToList()
+                        : productParents.OrderByDescending(p => p.finalPrice).ToList();
+                }
+
+                if (queryObject.SortBy == "sold")
+                {
+                    productParents = productParents.OrderBy(p => p.sold).ToList();
+                }
+
+                if (queryObject.SortBy == "createAt")
+                {
+                    productParents = productParents.OrderBy(p => p.CreatedAt).ToList();
+                }
+
+                if (totalProducts == 0)
+                {
+                    res.StatusCode = 404;
+                    res.Message = "Không tìm thấy sản phẩm";
+                    res.Data = null;
+                    return res;
+                }
+
+                // Tính toán tổng số trang
+                var totalPages = (int)Math.Ceiling((double)totalProducts / queryObject.PageSize);
+
+                // Trả về kết quả
+                res.StatusCode = 200;
+                res.Message = "Lấy dữ liệu thành công";
+                res.Data = productParents;
+                res.TotalPages = totalPages;
+                return res;
+            }
+        }
     }
-
-
 }
