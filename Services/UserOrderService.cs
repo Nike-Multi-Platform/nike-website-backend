@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using nike_website_backend.Dtos;
 using nike_website_backend.Helpers;
@@ -288,7 +289,7 @@ namespace nike_website_backend.Services
 
                 // Tạo query cơ bản để lọc đơn hàng theo userId và userOrderStatusId
                 var query = _context.UserOrders
-                .Where(v => v.UserId == userId)
+                .Where(v => v.UserId == userId).Include(p=>p.UserOrderStatus).Include(p=>p.UserOrderProducts).ThenInclude(p=>p.ProductSize).ThenInclude(p=>p.Product).Include(p=>p.ReturnRequests)
                 .OrderByDescending(v => v.CreatedAt).AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(text))
@@ -350,6 +351,7 @@ namespace nike_website_backend.Services
                         UserOrderId = userOrder.UserOrderId,
                         UserId = userOrder.UserId,
                         UserOrderStatusId = userOrder.UserOrderStatusId,
+                        UserOrderStatusName = userOrder.UserOrderStatus.UserOrderStatusName,
                         FirstName = userOrder.FirstName,
                         LastName = userOrder.LastName,
                         Address = userOrder.Address,
@@ -372,6 +374,21 @@ namespace nike_website_backend.Services
                         FinalPrice = userOrder.FinalPrice,
                         GHNService = userOrder.GhnService,
                         serviceLogs = serviceLogs,
+                        userOrderItems = userOrder.UserOrderProducts.Select(p => new UserOrderItemDTO
+                        {
+                            UserOrderId = p.UserOrderId,
+                            Amount = p.Amount,
+                            ProductSizeId = p.ProductSizeId,
+                            ProductParentId = p.ProductSize.Product.ProductParentId,
+                            ProductId = p.ProductSize.Product.ProductId,
+                            ProductName = p.ProductName,
+                            Thumbnail = p.Thumbnail,
+                            SizeName = p.SizeName,
+                            Price = p.Price,
+                        }).ToList(),
+                        isSendCancelRequest = userOrder.ReturnRequests.Any(r => r.RequestTypeId == 1),
+                        isSendRefundRequest = userOrder.ReturnRequests.Any(r => r.RequestTypeId == 2),
+
                     });
                 }
 
@@ -417,6 +434,52 @@ namespace nike_website_backend.Services
             res.Data = list;
             return res;
         }
+
+        public async Task<Response<bool>> WriteReviews(ReviewResponse review)
+        {
+            Response<bool> res = new Response<bool>();
+
+            try
+            {
+                // Thêm các review vào context
+                foreach (var item in review.Reviews)
+                {
+                    _context.ProductReviews.Add(new ProductReview
+                    {
+                        UserId = review.UserId,
+                        ProductId = item.ProductId,
+                        ProductSizeName = item.SizeName,
+                        ProductReviewContent = item.Review,
+                        ProductReviewRate = item.Rating,
+                        ProductReviewTime = DateTime.Now,
+                        ProductReviewTitle = item.Title,
+                    });
+                }
+
+                // Cập nhật trạng thái đơn hàng
+                var order = await _context.UserOrders.FirstOrDefaultAsync(p => p.UserOrderId == review.UserOrderId);
+                if (order != null)
+                {
+                    order.IsReviewed = 1;
+                }
+
+                // Lưu toàn bộ thay đổi
+                await _context.SaveChangesAsync();
+
+                res.StatusCode = 200;
+                res.Message = "Đánh giá thành công";
+                res.Data = true;
+            }
+            catch (Exception ex)
+            {
+                res.StatusCode = 500;
+                res.Message = $"Đã xảy ra lỗi: {ex.Message}";
+                res.Data = false;
+            }
+
+            return res;
+        }
+
 
     }
 }

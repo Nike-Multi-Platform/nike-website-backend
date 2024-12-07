@@ -467,6 +467,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ProductReviewTitle)
                 .HasMaxLength(255)
                 .HasColumnName("product_review_Title");
+            entity.Property(e => e.ProductSizeName)
+                .HasMaxLength(255)
+                .HasColumnName("product_size_name");
             entity.Property(e => e.UserId)
                 .HasMaxLength(255)
                 .IsUnicode(false)

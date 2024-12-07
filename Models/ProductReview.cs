@@ -19,6 +19,8 @@ public partial class ProductReview
 
     public double? ProductReviewRate { get; set; }
 
+    public string? ProductSizeName { get; set; }
+
     public virtual Product? Product { get; set; }
 
     public virtual UserAccount? User { get; set; }

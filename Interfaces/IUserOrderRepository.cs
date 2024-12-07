@@ -8,5 +8,6 @@ namespace nike_website_backend.Interfaces
         Task<Response<List<UserOrderDTO>>> GetUserOrder(string userId, int userOrderStatusId, string? text, int limit, int page);
         Task<ResponseGHN<dynamic>> GetOrderDetailGHNAsync(string orderCode);
         Task<Response<List<UserOrderStatus>>> GetStatusList();
+        Task<Response<Boolean>> WriteReviews(ReviewResponse review);
     }
 }

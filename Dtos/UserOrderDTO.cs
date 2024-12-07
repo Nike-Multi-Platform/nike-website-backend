@@ -5,6 +5,7 @@
         public int? UserOrderId { get; set; }
         public string? UserId { get; set; }
         public int? UserOrderStatusId { get; set; }
+        public string? UserOrderStatusName { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Address { get; set; }
@@ -29,5 +30,7 @@
         public GHNDto? serviceLogs { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public Boolean? isSendCancelRequest { get; set; }
+        public Boolean? isSendRefundRequest {  get; set; }
     }
 }

@@ -393,6 +393,7 @@ namespace nike_website_backend.Services
             {
                 ProductReviewId = r.ProductReviewId,
                 ProductRating = r.ProductReviewRate,
+                ProductSizeName = r.ProductSizeName,
                 ProductReviewContent = r.ProductReviewContent,
                 ProductReviewDate = r.ProductReviewTime,
                 ProductReviewTitle = r.ProductReviewTitle,
@@ -630,5 +631,7 @@ namespace nike_website_backend.Services
             res.TotalPages = totalPages;
             return res;
         }
+
+      
     }
 }

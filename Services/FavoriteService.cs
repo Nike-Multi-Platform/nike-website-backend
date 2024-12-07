@@ -100,11 +100,15 @@ namespace nike_website_backend.Services
                 Product = new ProductDto
                 {
                     ProductId = p.ProductId,
+                    ProductName = p.Product.ProductParent.ProductParentName,
+                    categoryWithObjectName = p.Product.ProductParent.SubCategories.Categories.ProductObject.ProductObjectName + "'s " + p.Product.ProductParent.SubCategories.Categories.CategoriesName,
                     ProductImage = p.Product.ProductImg,
                     ProductParentId = p.Product.ProductParentId,
                     price = p.Product.ProductParent.ProductPrice,
                     stock = p.Product.ProductParent.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
-                    salePrice = p.Product.ProductParent.Products.Any() ? p.Product.ProductParent.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0,
+                    salePrice = flashSaleTimeFrame!= null && p.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0) ? p.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice :  p.Product.ProductParent.Products.Any() ? p.Product.ProductParent.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0,
                     finalPrice = flashSaleTimeFrame != null
             ? p.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : p.Product.ProductParent.Products.Any() ? p.Product.ProductParent.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : p.Product.ProductParent.ProductPrice,
                 
