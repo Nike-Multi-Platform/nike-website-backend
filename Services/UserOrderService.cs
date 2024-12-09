@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Firebase.Auth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using nike_website_backend.Dtos;
@@ -434,6 +435,105 @@ namespace nike_website_backend.Services
             res.Data = list;
             return res;
         }
+        public async Task<Response<UserOrderDTO>> GetOrderDetail(int userOrderId)
+        {
+            Response<UserOrderDTO> res = new Response<UserOrderDTO>();
+            try
+            {
+                var query = _context.UserOrders
+             .Where(v => v.UserOrderId == userOrderId).Include(p => p.UserOrderStatus).Include(p => p.UserOrderProducts).ThenInclude(p => p.ProductSize).ThenInclude(p => p.Product).Include(p => p.ReturnRequests)
+             .AsQueryable();
+
+                var order = await query.FirstOrDefaultAsync();
+                var code = order.OrderCodeReturn != null ? order.OrderCodeReturn : order.OrderCode;
+
+                var serviceLogs = await GetOrderDetailGHNAsync1(code);
+
+                if (serviceLogs != null)
+                {
+                    if (serviceLogs.GhnStatus == "ready_to_pick" && order.UserOrderStatusId != 2 && order.UserOrderStatusId != 6 && order.OrderCodeReturn == null)
+                    {
+
+                        order.UserOrderStatusId = 2;
+
+                    }
+                    else if (serviceLogs.GhnStatus == "picked" && order.UserOrderStatusId != 3 && order.UserOrderStatusId != 6 && order.OrderCodeReturn == null)
+                    {
+                        order.UserOrderStatusId = 3;
+                    }
+                    else if (serviceLogs.GhnStatus == "cancel" && order.UserOrderStatusId != 5 && order.UserOrderStatusId != 6 && order.OrderCodeReturn == null)
+                    {
+                        order.UserOrderStatusId = 6;
+                    }
+                    else if (serviceLogs.GhnStatus == "delivered" && order.ReturnExpirationDate == null && order.OrderCodeReturn == null)
+                    {
+                        order.UserOrderStatusId = 4;
+                        order.ReturnExpirationDate = DateTime.Now.AddDays(7);
+                    }
+                    await _context.SaveChangesAsync();
+
+                }
+                var userOrderDTO = new UserOrderDTO
+                {
+                    UserOrderId = order.UserOrderId,
+                    UserId = order.UserId,
+                    UserOrderStatusId = order.UserOrderStatusId,
+                    UserOrderStatusName = order.UserOrderStatus.UserOrderStatusName,
+                    FirstName = order.FirstName,
+                    LastName = order.LastName,
+                    Address = order.Address,
+                    Email = order.Email,
+                    PhoneNumber = order.PhoneNumber,
+                    PaymentMethod = order.PaymentMethod,
+                    CreatedAt = order.CreatedAt,
+                    UpdatedAt = order.UpdatedAt,
+                    OrderCode = order.OrderCode,
+                    OrderCodeReturn = order.OrderCodeReturn,
+                    return_expiration_date = order.ReturnExpirationDate,
+                    IsReviewed = order.IsReviewed,
+                    IsProcessed = order.IsProcessed,
+                    VoucherApplied = order.VouchersApplied,
+                    IsCanceledBy = order.IsCanceledBy,
+                    ShippingFee = order.ShippingFee,
+                    TotalQuantity = order.TotalQuantity,
+                    TotalPrice = order.TotalPrice,
+                    DiscountPrice = order.DiscountPrice,
+                    FinalPrice = order.FinalPrice,
+                    GHNService = order.GhnService,
+                    serviceLogs = serviceLogs,
+                    userOrderItems = order.UserOrderProducts.Select(p => new UserOrderItemDTO
+                    {
+                        UserOrderId = p.UserOrderId,
+                        Amount = p.Amount,
+                        ProductSizeId = p.ProductSizeId,
+                        ProductParentId = p.ProductSize.Product.ProductParentId,
+                        ProductId = p.ProductSize.Product.ProductId,
+                        ProductName = p.ProductName,
+                        Thumbnail = p.Thumbnail,
+                        SizeName = p.SizeName,
+                        Price = p.Price,
+                    }).ToList(),
+                    isSendCancelRequest = order.ReturnRequests.Any(r => r.RequestTypeId == 1),
+                    isSendRefundRequest = order.ReturnRequests.Any(r => r.RequestTypeId == 2),
+                 
+
+                };
+
+                res.StatusCode = 200;
+                res.Message = "Lấy Dữ liệu thành công";
+                res.Data = userOrderDTO;
+                return res;
+
+            }
+            catch (Exception ex) {
+                return new Response<UserOrderDTO>
+                {
+                    StatusCode = 500,
+                    Data = null,
+                    Message = $"Đã xảy ra lỗi khi lấy đơn hàng: {ex.Message}"
+                };
+            }
+        }
 
         public async Task<Response<bool>> WriteReviews(ReviewResponse review)
         {
@@ -477,6 +577,52 @@ namespace nike_website_backend.Services
                 res.Data = false;
             }
 
+            return res;
+        }
+
+        public async Task<Response<Boolean>> SendRequest (RequestDTO request)
+        {
+            Response<Boolean> res = new Response<Boolean> ();
+            try
+            {
+                var newRequest = await _context.ReturnRequests.AddAsync(new ReturnRequest
+                {
+                    RequestTypeId = (int)request.RequestTypeId,
+                    UserOrderId = (int)request.UserOrderId,
+                    ReturnRequestReason = request.Reason,
+                    StatusId = 0,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                });
+
+                // Lưu toàn bộ thay đổi
+                await _context.SaveChangesAsync();
+
+                if (request.RequestImages.Count > 0) {
+                    List<ReturnRequestImg> images = new List<ReturnRequestImg> ();
+                    foreach (var image in request.RequestImages) {
+                        if (image != null) {
+                            images.Add(new ReturnRequestImg { 
+                                ReturnRequestId = newRequest.Entity.ReturnRequestId,
+                                ImgUrl = image.ImageUrl,
+                            });
+                        }
+                    }
+                    await _context.ReturnRequestImgs.AddRangeAsync(images);
+                    await _context.SaveChangesAsync();
+                }
+
+
+                res.StatusCode = 200;
+                res.Message = "Gửi yêu cầu thành công";
+                res.Data = true;
+            }
+            catch (Exception ex)
+            {
+                res.StatusCode = 500;
+                res.Message = $"Đã xảy ra lỗi: {ex.Message}";
+                res.Data = false;
+            }
             return res;
         }
 

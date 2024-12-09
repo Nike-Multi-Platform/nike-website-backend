@@ -26,6 +26,11 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _userOrderRepository.GetOrderDetailGHNAsync(orderCode));
         }
+        [HttpGet("get-details")]
+        public async Task<IActionResult> GetOrderDetail([FromQuery] int userOrderId)
+        {
+           return Ok(await _userOrderRepository.GetOrderDetail(userOrderId));
+        }
         [HttpGet("order-status")]
         public async Task<IActionResult> GetStatusList()
         {
@@ -35,6 +40,11 @@ namespace nike_website_backend.Controllers
         public async Task<IActionResult> WriteReviews([FromBody]ReviewResponse review)
         {
             return Ok(await _userOrderRepository.WriteReviews(review));
+        }
+        [HttpPost("send-request")]
+        public async Task<IActionResult> SendRequest(RequestDTO request)
+        {
+            return Ok(await _userOrderRepository.SendRequest(request));
         }
     }
 

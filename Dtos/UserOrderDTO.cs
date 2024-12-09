@@ -32,5 +32,6 @@
         public DateTime? UpdatedAt { get; set; }
         public Boolean? isSendCancelRequest { get; set; }
         public Boolean? isSendRefundRequest {  get; set; }
+     
     }
 }
