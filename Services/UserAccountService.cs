@@ -686,5 +686,100 @@ namespace nike_website_backend.Services
                 return Task.FromResult(response);
             }
         }
+
+        public async Task<Response<string>> ChangePassword(ChangePasswordDto changePasswordInfo)
+        {
+            // check valid input
+            Response<string> response = new Response<string>();
+            List<string> errorMessage = new List<string>();
+            if (string.IsNullOrEmpty(changePasswordInfo.UserID))
+            {
+                errorMessage.Add("UserId ");
+            }
+            if (string.IsNullOrEmpty(changePasswordInfo.CurrentPassword))
+            {
+                errorMessage.Add("Current password ");
+            }
+            if (string.IsNullOrEmpty(changePasswordInfo.NewPassword))
+            {
+                errorMessage.Add("New password ");
+            }
+            if(errorMessage.Count > 0)
+            {
+                response.Message = string.Join(",", errorMessage) + "is required.";
+                response.StatusCode = 400;
+                return response;
+            }
+            try
+            {
+                var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserId == changePasswordInfo.UserID);
+                if (user == null)
+                {
+                    response.Message = "User not found.";
+                    response.StatusCode = 404;
+                    return response;
+                }
+
+                // Verify current password
+                var firebaseConfig = ConfigHelper.LoadFirebaseConfig();
+                string firebaseApiKey = firebaseConfig.API_KEY;
+
+                var requestData = new
+                {
+                    email = user.UserEmail,
+                    password = changePasswordInfo.CurrentPassword,
+                    returnSecureToken = true
+                };
+
+                var jsonContent = JsonConvert.SerializeObject(requestData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                using (var client = new HttpClient())
+                {
+                    var firebaseResponse = await client.PostAsync(
+                        $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseApiKey}",
+                        content
+                    );
+
+                    if (!firebaseResponse.IsSuccessStatusCode)
+                    {
+                        response.Message = "Current password is incorrect.";
+                        response.StatusCode = 400;
+                        return response;
+                    }
+                }
+
+                // Update password in Firebase
+                var updateRequest = new UserRecordArgs
+                {
+                    Uid = changePasswordInfo.UserID,
+                    Password = changePasswordInfo.NewPassword,
+                };
+
+                await FirebaseAuth.DefaultInstance.UpdateUserAsync(updateRequest);
+
+                // revoke all refresh tokens to logout
+                //await Logout(changePasswordInfo.UserID);
+
+
+                response.Message = "Password changed successfully.";
+                response.StatusCode = 200;
+                return response;
+            }
+            catch (FirebaseAuthException ex)
+            {
+                response.Message = $"Firebase Authentication error: {ex.Message}";
+                response.StatusCode = 500;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                return response;
+            }
+
+
+        }
     }
 }
