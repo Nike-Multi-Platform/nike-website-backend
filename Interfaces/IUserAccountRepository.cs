@@ -18,5 +18,6 @@ namespace nike_website_backend.Interfaces
         Task<Response<string>> ForgotPassword(string email);
         Task<Response<List<HistorySearch>>> getHistorySearch(string UserId);
         Task<Response<Boolean>> saveHistorySearch(string userId, string keyword);
+        Task<Response<string>> ChangePassword(ChangePasswordDto changePasswordInfo);
     }
 }

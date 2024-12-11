@@ -5,6 +5,8 @@ using nike_website_backend.Services;
 using FirebaseAdmin;
 using Google;
 using Google.Apis.Auth.OAuth2;
+using Quartz;
+using nike_website_backend.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,12 +30,34 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;  // Tương tự như ReferenceLoopHandling.Ignore trong Newtonsoft.Json
 
     });
-builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+
+    var flashSaleJobKey = new JobKey("FlashSaleJob");
+    q.AddJob<FlashSaleJob>(opts => opts.WithIdentity(flashSaleJobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(flashSaleJobKey)
+        .WithIdentity("FlashSaleJob-trigger")
+        .WithCronSchedule("0 0 0 * * ?"));
+
+    var flashSaleTimeFrameJobKey = new JobKey("FlashSaleTimeFrameJob");
+    q.AddJob<FlashSaleTimeFrameJob>(opts => opts.WithIdentity(flashSaleTimeFrameJobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(flashSaleTimeFrameJobKey)
+        .WithIdentity("FlashSaleTimeFrameJob-trigger")
+        .WithCronSchedule("0 0 0/2 * * ?"));
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IProductRepository, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryService>();
 builder.Services.AddScoped<IUserAccountRepository, UserAccountService>();
-builder.Services.AddScoped<IFlashSaleRepository,FlashSaleService>();
+builder.Services.AddScoped<IFlashSaleRepository, FlashSaleService>();
 builder.Services.AddScoped<IBagRepository, BagService>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentService>();
