@@ -106,14 +106,18 @@ namespace nike_website_backend.Services
                     ProductParentId = p.Product.ProductParentId,
                     price = p.Product.ProductParent.ProductPrice,
                     stock = p.Product.ProductParent.Products.Sum(t => t.ProductSizes.Sum(s => s.Soluong)),
-                    salePrice = flashSaleTimeFrame!= null && p.Product.ProductParent.RegisterFlashSaleProducts
+                    salePrice = flashSaleTimeFrame != null &&
+                         p.Product.ProductParent.RegisterFlashSaleProducts
                             .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
-                                      r.Quantity - r.Sold > 0) ? p.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice :  p.Product.ProductParent.Products.Any() ? p.Product.ProductParent.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : 0,
-                    finalPrice = flashSaleTimeFrame != null
-            ? p.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : p.Product.ProductParent.Products.Any() ? p.Product.ProductParent.Products.Where(p => p.SalePrices > 0).Min(p => p.SalePrices) : p.Product.ProductParent.ProductPrice,
+                                      r.Quantity - r.Sold > 0) ? p.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : p.Product.SalePrices > 0 ? p.Product.SalePrices : 0,
+                    finalPrice = flashSaleTimeFrame != null &&
+                         p.Product.ProductParent.RegisterFlashSaleProducts
+                            .Any(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId &&
+                                      r.Quantity - r.Sold > 0)
+            ? p.Product.ProductParent.RegisterFlashSaleProducts.FirstOrDefault(r => r.FlashSaleTimeFrameId == flashSaleTimeFrame.FlashSaleTimeFrameId).FlashSalePrice : p.Product.SalePrices > 0 ? p.Product.SalePrices : p.Product.ProductParent.ProductPrice,
                 
             }
-            }).AsNoTracking().AsQueryable();
+            }).OrderByDescending(p=>p.Id).AsNoTracking().AsQueryable();
 
             var favorites = await query.Skip(offset).Take(limit).ToListAsync();
             var count = await query.CountAsync();

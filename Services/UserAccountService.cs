@@ -676,6 +676,14 @@ namespace nike_website_backend.Services
             Response<Boolean> response = new Response<Boolean>();
             try
             {
+
+                var isExists = await _context.HistorySearches.Where(p=>p.TextSearch.ToLower() == keyword.ToLower()).CountAsync();
+                if (isExists > 0) {
+                    response.StatusCode = 400;
+                    response.Data = false;
+                    response.Message = "Đã có lịch sử này";
+                    return response;
+                }
                 var newHistory = await _context.HistorySearches.AddAsync(new HistorySearch
                 {
                     UserId = userId,

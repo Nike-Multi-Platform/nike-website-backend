@@ -70,7 +70,7 @@ namespace nike_website_backend.Controllers
             return Ok(await _userAccountRepository.ForgotPassword(email));
         }
         [HttpPost("save-search")]
-        public async Task<IActionResult> saveHistorySearch([FromBody] string userId, [FromBody] string keyword)
+        public async Task<IActionResult> saveHistorySearch([FromQuery] string userId, [FromQuery] string keyword)
         {
             return Ok(await _userAccountRepository.saveHistorySearch(userId, keyword));
         }

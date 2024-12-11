@@ -7,5 +7,7 @@ namespace nike_website_backend.Interfaces
     public interface IFlashSaleRepository
     {
         Task<Response<FlashSaleTimeFrameDto>> getActiveFlashSale(int limit);
+        Task<Response<List<FlashSaleTimeFrame>>> getAvailableFlashSaleTimeFrame();
+        Task<Response<List<ProductParentDto>>> getProductsByTimeFrameId(int timeFrameId, int page, int limit);
     }
 }

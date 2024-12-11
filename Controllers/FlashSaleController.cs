@@ -19,5 +19,17 @@ namespace nike_website_backend.Controllers
         {
             return Ok(await _flashSaleRepository.getActiveFlashSale(limit));
         }
+
+        [HttpGet("get-available-time-frames")]
+        public async Task<IActionResult> getAvailableFlashSaleTimeFrame()
+        {
+            return Ok(await _flashSaleRepository.getAvailableFlashSaleTimeFrame());
+        }
+
+        [HttpGet("get-products-by-time-frame-id")]
+        public async Task<IActionResult> getProductsByTimeFrameId([FromQuery] int timeFrameId, [FromQuery] int page, [FromQuery] int limit)
+        {
+            return Ok(await _flashSaleRepository.getProductsByTimeFrameId(timeFrameId,page,limit));
+        }
     }
 }
