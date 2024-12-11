@@ -16,5 +16,7 @@ namespace nike_website_backend.Interfaces
         Task<Response<string>> Logout(string UserId);
         Task<Response<string>> UpdateProfile(UpdateProfileDto user_info);
         Task<Response<string>> ForgotPassword(string email);
+        Task<Response<List<HistorySearch>>> getHistorySearch(string UserId);
+        Task<Response<Boolean>> saveHistorySearch(string userId, string keyword);
     }
 }

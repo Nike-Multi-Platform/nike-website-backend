@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Firebase.Auth;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
@@ -644,6 +645,60 @@ namespace nike_website_backend.Services
                 return response;
             }
         }
+
+        public async Task<Response<List<HistorySearch>>> getHistorySearch(string UserId)
+        {
+            Response<List<HistorySearch>> response = new Response<List<HistorySearch>>();
+            try
+            {
+                var history = await _context.HistorySearches.Where(v=>v.UserId == UserId).OrderByDescending(v=>v.CreatedAt).Take(20).ToListAsync();
+                if(history == null)
+                {
+                    response.StatusCode = 400;
+                    response.Data = [];
+                    response.Message = "Hiện không có dữ liệu search";
+                    return response;
+                }
+                response.StatusCode = 200;
+                response.Data = history;
+                response.Message = "Lấy dữ liệu thành công";
+                return response;
+            }
+            catch (Exception ex) {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                response.Data = [];
+                return response;
+            }
+        }
+        public async Task<Response<Boolean>> saveHistorySearch(string userId, string keyword)
+        {
+            Response<Boolean> response = new Response<Boolean>();
+            try
+            {
+                var newHistory = await _context.HistorySearches.AddAsync(new HistorySearch
+                {
+                    UserId = userId,
+                    TextSearch = keyword,
+                    CreatedAt = DateTime.Now,
+                });
+
+                await _context.SaveChangesAsync();
+
+                response.StatusCode = 200;
+                response.Data = true;
+                response.Message = "Lấy dữ liệu thành công";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Unexpected error: {ex.Message}";
+                response.StatusCode = 500;
+                response.Data = false;
+                return response;
+            }
+        }
+
 
         public Task<Response<string>> ForgotPassword(string email)
         {
