@@ -244,7 +244,7 @@ namespace nike_website_backend.Services
                 try
                 {
                     await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(userinfo.UserEmail);
-                    response.Message = "Email này đã được sử dụng";
+                    response.Message = "This email is already in use";
                     response.StatusCode = 400;
                     return response;
                 }
@@ -315,7 +315,7 @@ namespace nike_website_backend.Services
                 await _context.SaveChangesAsync();
 
                 // Prepare response
-                response.Message = "Đăng kí thành công. Vui lòng kiểm tra email để xác thực tài khoản";
+                response.Message = "Registration successful. Please check your email to verify your account";
                 response.StatusCode = 200;
                 object data = new
                 {
@@ -372,7 +372,7 @@ namespace nike_website_backend.Services
                 var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserEmail == loginInfo.Email);
                 if (user == null)
                 {
-                    response.Message = "Không tìm thấy tài khoản";
+                    response.Message = "Account not found";
                     response.StatusCode = 404; // Not Found
                     return response;
                 }
@@ -383,7 +383,7 @@ namespace nike_website_backend.Services
                 var user = await _context.UserAccounts.FirstOrDefaultAsync(x => x.UserUsername == loginInfo.Email);
                 if (user == null)
                 {
-                    response.Message = "Thông tin đăng nhập sai";
+                    response.Message = "Username or password invalid";
                     response.StatusCode = 404; // Not Found
                     return response;
                 }
@@ -424,15 +424,15 @@ namespace nike_website_backend.Services
                         // Kiểm tra thông báo lỗi cụ thể từ Firebase
                         if (errorMessage == "EMAIL_NOT_FOUND")
                         {
-                            response.Message = "Tài khoản hoặc mật khẩu không chính xác";
+                            response.Message = "Username or password invalid";
                         }
                         else if (errorMessage == "INVALID_PASSWORD")
                         {
-                            response.Message = "Tài khoản hoặc mật khẩu không chính xác";
+                            response.Message = "Username or password invalid";
                         }
                         else if (errorMessage == "INVALID_LOGIN_CREDENTIALS")
                         {
-                            response.Message = "Tài khoản hoặc mật khẩu không chính xác";
+                            response.Message = "Username or password invalid";
                         }
                         else
                         {
@@ -455,14 +455,14 @@ namespace nike_website_backend.Services
                         var user = await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(user_email);
                         if (!user.EmailVerified)
                         {
-                            response.Message = "Hãy kiểm tra email để xác thực tài khoản";
+                            response.Message = "Please check your email to verify your account";
                             response.StatusCode = 400;
                             return response;
                         }
                         if (idTokenResponse.StatusCode == 200)
                         {
                             response.Data = idTokenResponse.Data;
-                            response.Message = "Đăng nhập thành công";
+                            response.Message = "Login successfully";
                             response.StatusCode = 200; // OK
                         }
                         else
@@ -561,13 +561,13 @@ namespace nike_website_backend.Services
                     _context.UserAccounts.Add(newUser);
                     await _context.SaveChangesAsync();
 
-                    response.Message = "Tạo thành công tài khoản mới bằng Google.";
+                    response.Message = "Successfully created a new account with Google Account";
                     response.Data = idToken;
                     response.StatusCode = 200;
                 }
                 else
                 {
-                    response.Message = "Đăng nhập thành công.";
+                    response.Message = "Login successfully";
                     response.Data = idToken;
                     response.StatusCode = 200;
                 }
@@ -778,8 +778,6 @@ namespace nike_website_backend.Services
                 response.StatusCode = 500;
                 return response;
             }
-
-
         }
     }
 }
