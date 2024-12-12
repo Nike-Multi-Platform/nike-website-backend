@@ -3,6 +3,7 @@ using nike_website_backend.Dtos;
 using nike_website_backend.Helpers;
 using nike_website_backend.Interfaces;
 using nike_website_backend.Models;
+using Quartz.Util;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text.RegularExpressions;
@@ -534,9 +535,13 @@ namespace nike_website_backend.Services
             var query = _context.ProductParents.AsQueryable();
 
             // Lọc theo tên sản phẩm
-            if (!string.IsNullOrEmpty(queryObject.searchText))
+            if (!string.IsNullOrWhiteSpace(queryObject.searchText))
             {
-                query = query.Where(p => p.ProductParentName.Contains(queryObject.searchText));
+                var searchText = queryObject.searchText.ToLower();
+                query = query.Where(p =>
+                    p.ProductParentName.ToLower().Contains(searchText) ||
+                    p.Products.Any(x => x.ProductStyleCode.ToLower().Contains(searchText))
+                );
             }
             // Lọc theo SubCategoryId
             if (queryObject.sub_categories_id > 0)

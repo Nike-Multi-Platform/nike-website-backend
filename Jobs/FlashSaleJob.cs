@@ -16,32 +16,33 @@ namespace nike_website_backend.Jobs
         public async Task Execute(IJobExecutionContext context)
         {
             var now = DateTime.Now;
-
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            DateTime localCurrentDate = TimeZoneInfo.ConvertTime(now, localTimeZone);
             // Lấy các Flash Sale cần kích hoạt
             var flashSalesToActivate = await _context.FlashSales
-                .Where(f => f.StartedAt <= now && f.EndedAt > now && f.Status == "waiting")
+                .Where(f => f.StartedAt <= localCurrentDate && f.EndedAt > localCurrentDate && f.Status == "waiting")
                 .ToListAsync();
 
             foreach (var flashSale in flashSalesToActivate)
             {
                 flashSale.Status = "active"; 
-                Console.WriteLine($"[{DateTime.Now}] Kích hoạt Flash Sale: ID = {flashSale.FlashSaleId}, Tên = {flashSale.FlashSaleName}");
+                Console.WriteLine($"[{localCurrentDate}] Kích hoạt Flash Sale: ID = {flashSale.FlashSaleId}, Tên = {flashSale.FlashSaleName}");
             }
 
             // Lấy các Flash Sale cần kết thúc
             var flashSalesToEnd = await _context.FlashSales
-                .Where(f => f.EndedAt <= now && f.Status == "active")
+                .Where(f => f.EndedAt <= localCurrentDate && f.Status == "active")
                 .ToListAsync();
 
             foreach (var flashSale in flashSalesToEnd)
             {
                 flashSale.Status = "ended";
-                Console.WriteLine($"[{DateTime.Now}] Kết thúc Flash Sale: ID = {flashSale.FlashSaleId}, Tên = {flashSale.FlashSaleName}");
+                Console.WriteLine($"[{localCurrentDate}] Kết thúc Flash Sale: ID = {flashSale.FlashSaleId}, Tên = {flashSale.FlashSaleName}");
             }
 
             await _context.SaveChangesAsync();
 
-            Console.WriteLine($"[{DateTime.Now}] Hoàn thành cập nhật trạng thái Flash Sale.");
+            Console.WriteLine($"[{localCurrentDate}] Hoàn thành cập nhật trạng thái Flash Sale.");
         }
     }
 }

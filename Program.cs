@@ -41,7 +41,8 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(flashSaleJobKey)
         .WithIdentity("FlashSaleJob-trigger")
-        .WithCronSchedule("0 0 0 * * ?"));
+        .WithCronSchedule("0 0/1 * * * ?"));
+    //0 0 0 * * ?
 
     var flashSaleTimeFrameJobKey = new JobKey("FlashSaleTimeFrameJob");
     q.AddJob<FlashSaleTimeFrameJob>(opts => opts.WithIdentity(flashSaleTimeFrameJobKey));
@@ -49,7 +50,8 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(flashSaleTimeFrameJobKey)
         .WithIdentity("FlashSaleTimeFrameJob-trigger")
-        .WithCronSchedule("0 0 0/2 * * ?"));
+        .WithCronSchedule("0 0/1 * * * ?"));
+    //0 0 0 / 2 * * ?
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
